@@ -1,12 +1,18 @@
 package com.example;
 
+/**
+ * Represents a chess move with optional metadata like castling or en passant.
+ * Also stores previous state to support undo functionality.
+ */
 public class Move {
-    public int from, to;
+    public final int from;
+    public final int to;
+
     public boolean isEnPassant = false;
     public boolean isCastleKingside = false;
     public boolean isCastleQueenside = false;
 
-    // Gem tidligere state så vi kan fortryde korrekt
+    // Previous state for undoing moves
     public boolean prevWhiteKingMoved;
     public boolean prevBlackKingMoved;
     public boolean prevWhiteKingsideRookMoved;
@@ -15,12 +21,17 @@ public class Move {
     public boolean prevBlackQueensideRookMoved;
     public int prevEnPassantSquare;
 
+    /**
+     * Constructs a move from one square to another.
+     */
     public Move(int from, int to) {
         this.from = from;
         this.to = to;
     }
 
-    // Kopi-konstruktor – bruges i simulering
+    /**
+     * Copy constructor - used for move simulation (e.g., legal move filtering).
+     */
     public Move(Move other) {
         this.from = other.from;
         this.to = other.to;
@@ -31,7 +42,8 @@ public class Move {
 
     @Override
     public String toString() {
-        return Main.squareToCoord(from) + " -> " + Main.squareToCoord(to);
+        return MoveGenerator.squareToCoord(from) + " -> " + MoveGenerator.squareToCoord(to);
     }
 }
+
 

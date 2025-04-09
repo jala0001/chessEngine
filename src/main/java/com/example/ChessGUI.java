@@ -23,21 +23,21 @@ class ChessGUI extends JFrame {
     }
 
     void handleClick(int square) {
-        System.out.println("🔍 Klik på: " + square + " = " + Main.squareToCoord(square));
-        if ((Main.isWhiteTurn && Main.board[square] < 0) ||
-                (!Main.isWhiteTurn && Main.board[square] > 0)) {
+        System.out.println("🔍 Klik på: " + square + " = " + MoveGenerator.squareToCoord(square));
+        if ((Game.isWhiteTurn && Game.board[square] < 0) ||
+                (!Game.isWhiteTurn && Game.board[square] > 0)) {
             System.out.println("❌ Det er ikke din tur – ignorer klik.");
             return;
         }
-        int piece = Main.board[square];
+        int piece = Game.board[square];
 
         if (selectedSquare == -1) {
-            if (piece != 0 && ((Main.isWhiteTurn && piece > 0) || (!Main.isWhiteTurn && piece < 0))) {
+            if (piece != 0 && ((Game.isWhiteTurn && piece > 0) || (!Game.isWhiteTurn && piece < 0))) {
                 selectedSquare = square;
-                System.out.println("🖱️ Valgte: " + Main.squareToCoord(square));
+                System.out.println("🖱️ Valgte: " + MoveGenerator.squareToCoord(square));
             }
         } else {
-            List<Move> allMoves = Rules.generateLegalMoves();
+            List<Move> allMoves = Game.generateLegalMoves();
 
             System.out.println("📋 Genererede lovlige træk:");
             for (Move m : allMoves) {
@@ -51,14 +51,14 @@ class ChessGUI extends JFrame {
                 }
             }
 
-            System.out.println("🎯 Træk fra valgte felt (" + Main.squareToCoord(selectedSquare) + "):");
+            System.out.println("🎯 Træk fra valgte felt (" + MoveGenerator.squareToCoord(selectedSquare) + "):");
             for (Move m : legalMovesFromSelected) {
                 System.out.println(" → " + m);
             }
 
             for (Move move : legalMovesFromSelected) {
                 if (move.to == square) {
-                    System.out.println("⬅️ " + (Main.isWhiteTurn ? "Hvid" : "Sort") + " udfører træk: " + move);
+                    System.out.println("⬅️ " + (Game.isWhiteTurn ? "Hvid" : "Sort") + " udfører træk: " + move);
 
                     if (move.isEnPassant) {
                         System.out.println("🔥 En passant bliver udført!");
@@ -70,13 +70,13 @@ class ChessGUI extends JFrame {
                         System.out.println("🏰 Dronningeside rokade!");
                     }
 
-                    int captured = Main.makeMove(move);
-                    Main.isWhiteTurn = !Main.isWhiteTurn;
-                    System.out.println("➡️ Nu er det " + (Main.isWhiteTurn ? "hvid" : "sort") + "s tur");
+                    int captured = Game.makeMove(move);
+                    Game.isWhiteTurn = !Game.isWhiteTurn;
+                    System.out.println("➡️ Nu er det " + (Game.isWhiteTurn ? "hvid" : "sort") + "s tur");
 
                     // Promotion
-                    int movedPiece = Main.board[move.to];
-                    if (Math.abs(movedPiece) == Main.PAWN) {
+                    int movedPiece = Game.board[move.to];
+                    if (Math.abs(movedPiece) == MoveGenerator.PAWN) {
                         int rank = move.to >> 4;
                         if ((rank == 7 && movedPiece > 0) || (rank == 0 && movedPiece < 0)) {
                             String[] options = { "Dronning", "Tårn", "Løber", "Springer" };
@@ -85,21 +85,21 @@ class ChessGUI extends JFrame {
                                     null, options, options[0]);
 
                             int newPiece = switch (choice) {
-                                case 1 -> Main.ROOK;
-                                case 2 -> Main.BISHOP;
-                                case 3 -> Main.KNIGHT;
-                                default -> Main.QUEEN;
+                                case 1 -> MoveGenerator.ROOK;
+                                case 2 -> MoveGenerator.BISHOP;
+                                case 3 -> MoveGenerator.KNIGHT;
+                                default -> MoveGenerator.QUEEN;
                             };
-                            Main.board[move.to] = movedPiece > 0 ? newPiece : -newPiece;
+                            Game.board[move.to] = movedPiece > 0 ? newPiece : -newPiece;
                             System.out.println("♛ Promotion til: " + options[choice]);
                         }
                     }
 
                     // Skakmat/patt
-                    List<Move> nextMoves = Rules.generateLegalMoves();
+                    List<Move> nextMoves = Game.generateLegalMoves();
                     if (nextMoves.isEmpty()) {
-                        if (Rules.isInCheck()) {
-                            JOptionPane.showMessageDialog(this, (Main.isWhiteTurn ? "Hvid" : "Sort") + " er mat!");
+                        if (Game.isInCheck()) {
+                            JOptionPane.showMessageDialog(this, (Game.isWhiteTurn ? "Hvid" : "Sort") + " er mat!");
                         } else {
                             JOptionPane.showMessageDialog(this, "Patt! Uafgjort.");
                         }
@@ -123,7 +123,7 @@ class ChessGUI extends JFrame {
         for (int rank = 7; rank >= 0; rank--) {
             for (int file = 0; file < 8; file++) {
                 int square = rank * 16 + file;
-                JButton tile = new JButton(getPieceSymbol(Main.board[square]));
+                JButton tile = new JButton(getPieceSymbol(Game.board[square]));
                 tile.setFont(new Font("Arial", Font.PLAIN, 32));
                 tile.setBackground((rank + file) % 2 == 0 ? Color.WHITE : Color.GRAY);
 
@@ -140,18 +140,18 @@ class ChessGUI extends JFrame {
 
     String getPieceSymbol(int piece) {
         return switch (piece) {
-            case Main.PAWN -> "♙";
-            case Main.KNIGHT -> "♘";
-            case Main.BISHOP -> "♗";
-            case Main.ROOK -> "♖";
-            case Main.QUEEN -> "♕";
-            case Main.KING -> "♔";
-            case -Main.PAWN -> "♟";
-            case -Main.KNIGHT -> "♞";
-            case -Main.BISHOP -> "♝";
-            case -Main.ROOK -> "♜";
-            case -Main.QUEEN -> "♛";
-            case -Main.KING -> "♚";
+            case MoveGenerator.PAWN -> "♙";
+            case MoveGenerator.KNIGHT -> "♘";
+            case MoveGenerator.BISHOP -> "♗";
+            case MoveGenerator.ROOK -> "♖";
+            case MoveGenerator.QUEEN -> "♕";
+            case MoveGenerator.KING -> "♔";
+            case -MoveGenerator.PAWN -> "♟";
+            case -MoveGenerator.KNIGHT -> "♞";
+            case -MoveGenerator.BISHOP -> "♝";
+            case -MoveGenerator.ROOK -> "♜";
+            case -MoveGenerator.QUEEN -> "♛";
+            case -MoveGenerator.KING -> "♚";
             default -> "";
         };
     }
