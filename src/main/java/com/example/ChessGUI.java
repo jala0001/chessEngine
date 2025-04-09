@@ -118,12 +118,39 @@ class ChessGUI extends JFrame {
     void drawBoard() {
         boardPanel.removeAll();
 
+        // Skakbræt-farver
+        Color lightSquare = new Color(240, 217, 181);   // beige
+        Color darkSquare = new Color(181, 136, 99);     // brun
+        Color selectedColor = new Color(255, 255, 153); // gul markering
+
+        Font chessFont = new Font("Arial", Font.PLAIN, 32);
+
         for (int rank = 7; rank >= 0; rank--) {
             for (int file = 0; file < 8; file++) {
                 int square = rank * 16 + file;
-                JButton tile = new JButton(getPieceSymbol(Game.board[square]));
-                tile.setFont(new Font("Arial", Font.PLAIN, 32));
-                tile.setBackground((rank + file) % 2 == 0 ? Color.WHITE : Color.GRAY);
+                int piece = Game.board[square];
+
+                JButton tile = new JButton(getPieceSymbol(piece));
+                tile.setFont(chessFont);
+                tile.setFocusPainted(false);
+                tile.setBorderPainted(false);
+                tile.setOpaque(true);
+
+                // 🎨 Sæt korrekt tekstfarve: sort for hvid brik, hvid for sort brik
+                if (piece > 0) {
+                    tile.setForeground(Color.WHITE); // hvid brik vises som sort tekst
+                } else if (piece < 0) {
+                    tile.setForeground(Color.BLACK); // sort brik vises som hvid tekst
+                } else {
+                    tile.setForeground(Color.DARK_GRAY); // tomt felt = diskret
+                }
+
+                boolean isLight = (rank + file) % 2 == 0;
+                tile.setBackground(isLight ? lightSquare : darkSquare);
+
+                if (square == selectedSquare) {
+                    tile.setBackground(selectedColor);
+                }
 
                 final int clickedSquare = square;
                 tile.addActionListener(e -> handleClick(clickedSquare));
@@ -135,6 +162,8 @@ class ChessGUI extends JFrame {
         boardPanel.revalidate();
         boardPanel.repaint();
     }
+
+
 
     String getPieceSymbol(int piece) {
         return switch (piece) {

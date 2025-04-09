@@ -4,12 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="05abe853-bca5-4c1a-b6c5-08cd798a7c55" name="Changes" comment="refactored">
+    <list default="true" id="05abe853-bca5-4c1a-b6c5-08cd798a7c55" name="Changes" comment="now possible to check">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/example/ChessGUI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/ChessGUI.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/Game.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/Game.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/Move.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/Move.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/MoveGenerator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/MoveGenerator.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -76,7 +73,7 @@
       <option name="presentableId" value="Default" />
       <updated>1742810054549</updated>
       <workItem from="1742810055615" duration="25168000" />
-      <workItem from="1743848294571" duration="28974000" />
+      <workItem from="1743848294571" duration="30347000" />
     </task>
     <task id="LOCAL-00001" summary="created board with castle, en passant working and simple gui">
       <option name="closed" value="true" />
@@ -94,7 +91,15 @@
       <option name="project" value="LOCAL" />
       <updated>1744195414504</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="now possible to check">
+      <option name="closed" value="true" />
+      <created>1744203281671</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1744203281671</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -103,6 +108,7 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="created board with castle, en passant working and simple gui" />
     <MESSAGE value="refactored" />
-    <option name="LAST_COMMIT_MESSAGE" value="refactored" />
+    <MESSAGE value="now possible to check" />
+    <option name="LAST_COMMIT_MESSAGE" value="now possible to check" />
   </component>
 </project>
