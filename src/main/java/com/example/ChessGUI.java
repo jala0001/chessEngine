@@ -24,17 +24,15 @@ class ChessGUI extends JFrame {
 
     void handleClick(int square) {
         System.out.println("🔍 Klik på: " + square + " = " + MoveGenerator.squareToCoord(square));
-        if ((Game.isWhiteTurn && Game.board[square] < 0) ||
-                (!Game.isWhiteTurn && Game.board[square] > 0)) {
-            System.out.println("❌ Det er ikke din tur – ignorer klik.");
-            return;
-        }
         int piece = Game.board[square];
 
         if (selectedSquare == -1) {
+            // Kun tjek tur når spiller vælger brik
             if (piece != 0 && ((Game.isWhiteTurn && piece > 0) || (!Game.isWhiteTurn && piece < 0))) {
                 selectedSquare = square;
                 System.out.println("🖱️ Valgte: " + MoveGenerator.squareToCoord(square));
+            } else {
+                System.out.println("❌ Ikke din brik – ignorer klik.");
             }
         } else {
             List<Move> allMoves = Game.generateLegalMoves();
@@ -71,7 +69,6 @@ class ChessGUI extends JFrame {
                     }
 
                     int captured = Game.makeMove(move);
-                    Game.isWhiteTurn = !Game.isWhiteTurn;
                     System.out.println("➡️ Nu er det " + (Game.isWhiteTurn ? "hvid" : "sort") + "s tur");
 
                     // Promotion
@@ -113,6 +110,7 @@ class ChessGUI extends JFrame {
             drawBoard();
         }
     }
+
 
 
 

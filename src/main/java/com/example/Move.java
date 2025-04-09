@@ -38,6 +38,14 @@ public class Move {
         this.isEnPassant = other.isEnPassant;
         this.isCastleKingside = other.isCastleKingside;
         this.isCastleQueenside = other.isCastleQueenside;
+
+        this.prevWhiteKingMoved = other.prevWhiteKingMoved;
+        this.prevBlackKingMoved = other.prevBlackKingMoved;
+        this.prevWhiteKingsideRookMoved = other.prevWhiteKingsideRookMoved;
+        this.prevWhiteQueensideRookMoved = other.prevWhiteQueensideRookMoved;
+        this.prevBlackKingsideRookMoved = other.prevBlackKingsideRookMoved;
+        this.prevBlackQueensideRookMoved = other.prevBlackQueensideRookMoved;
+        this.prevEnPassantSquare = other.prevEnPassantSquare;
     }
 
     @Override
