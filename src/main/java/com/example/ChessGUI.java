@@ -5,6 +5,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.border.LineBorder;
+
 
 class ChessGUI extends JFrame {
     static final int TILE_SIZE = 64;
@@ -23,24 +25,15 @@ class ChessGUI extends JFrame {
     }
 
     void handleClick(int square) {
-        System.out.println("🔍 Klik på: " + square + " = " + MoveGenerator.squareToCoord(square));
         int piece = Game.board[square];
 
         if (selectedSquare == -1) {
             // Kun tjek tur når spiller vælger brik
-            if (piece != 0 && ((Game.isWhiteTurn && piece > 0) || (!Game.isWhiteTurn && piece < 0))) {
+            if (((Game.isWhiteTurn && piece > 0) || (!Game.isWhiteTurn && piece < 0))) {
                 selectedSquare = square;
-                System.out.println("🖱️ Valgte: " + MoveGenerator.squareToCoord(square));
-            } else {
-                System.out.println("❌ Ikke din brik – ignorer klik.");
             }
         } else {
             List<Move> allMoves = Game.generateLegalMoves();
-
-            System.out.println("📋 Genererede lovlige træk:");
-            for (Move m : allMoves) {
-                System.out.println(" - " + m);
-            }
 
             List<Move> legalMovesFromSelected = new ArrayList<>();
             for (Move move : allMoves) {
@@ -97,7 +90,7 @@ class ChessGUI extends JFrame {
                     if (nextMoves.isEmpty()) {
                         if (Game.isInCheck()) {
                             JOptionPane.showMessageDialog(this, (Game.isWhiteTurn ? "Hvid" : "Sort") + " er mat!");
-                        } else {
+                        } else if (Game.isDrawByStalemate()) {
                             JOptionPane.showMessageDialog(this, "Patt! Uafgjort.");
                         }
                     }
@@ -135,25 +128,49 @@ class ChessGUI extends JFrame {
                 tile.setFocusPainted(false);
                 tile.setBorderPainted(false);
                 tile.setOpaque(true);
+                tile.setMargin(new Insets(2, 2, 2, 2));
+                tile.setContentAreaFilled(true);
 
-                // 🎨 Sæt korrekt tekstfarve: sort for hvid brik, hvid for sort brik
+                // 🎨 Sæt tekstfarve
                 if (piece > 0) {
-                    tile.setForeground(Color.WHITE); // hvid brik vises som sort tekst
+                    tile.setForeground(Color.WHITE);
                 } else if (piece < 0) {
-                    tile.setForeground(Color.BLACK); // sort brik vises som hvid tekst
+                    tile.setForeground(Color.BLACK);
                 } else {
-                    tile.setForeground(Color.DARK_GRAY); // tomt felt = diskret
+                    tile.setForeground(Color.DARK_GRAY);
                 }
 
-                boolean isLight = (rank + file) % 2 == 0;
-                tile.setBackground(isLight ? lightSquare : darkSquare);
+                boolean isDark = (rank + file) % 2 == 0;
+                Color baseColor = isDark ? darkSquare : lightSquare;
+                tile.setBackground(baseColor);
 
+                // ✨ Marker valgt felt
                 if (square == selectedSquare) {
                     tile.setBackground(selectedColor);
+                    tile.setBorder(new LineBorder(Color.YELLOW, 3));
+                } else {
+                    tile.setBorder(null);
                 }
 
                 final int clickedSquare = square;
+
+                // 🖱️ Klik
                 tile.addActionListener(e -> handleClick(clickedSquare));
+
+                // 🌈 Hover-effekt
+                tile.addMouseListener(new java.awt.event.MouseAdapter() {
+                    public void mouseEntered(java.awt.event.MouseEvent evt) {
+                        tile.setBackground(tile.getBackground().brighter());
+                    }
+
+                    public void mouseExited(java.awt.event.MouseEvent evt) {
+                        if (clickedSquare == selectedSquare) {
+                            tile.setBackground(selectedColor);
+                        } else {
+                            tile.setBackground(baseColor);
+                        }
+                    }
+                });
 
                 boardPanel.add(tile);
             }
@@ -162,6 +179,7 @@ class ChessGUI extends JFrame {
         boardPanel.revalidate();
         boardPanel.repaint();
     }
+
 
 
 

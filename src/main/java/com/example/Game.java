@@ -32,7 +32,7 @@ public class Game {
 
         if (kingSquare == -1) return true;
 
-        return isSquareAttacked(kingSquare, !whiteToCheck);  // angribes den af modstanderen?
+        return isSquareAttacked(kingSquare, !whiteToCheck);
     }
 
 
@@ -345,4 +345,18 @@ public class Game {
         enPassantSquare = move.prevEnPassantSquare;
         isWhiteTurn = !isWhiteTurn;
     }
+
+    public static boolean isStalemate() {
+        return generateLegalMoves().isEmpty() && !isInCheck();
+    }
+
+    public static boolean isCheckmate() {
+        return generateLegalMoves().isEmpty() && isInCheck();
+    }
+
+    public static boolean isDrawByStalemate() {
+        return generateLegalMoves().isEmpty() && !isInCheck();
+    }
+
+
 }
