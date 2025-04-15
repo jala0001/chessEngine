@@ -29,7 +29,7 @@ class ChessGUI extends JFrame {
 
         if (selectedSquare == -1) {
             // Kun tjek tur når spiller vælger brik
-            if (((Game.isWhiteTurn && piece > 0) || (!Game.isWhiteTurn && piece < 0))) {
+            if ((Game.isWhiteTurn && piece > 0)) {
                 selectedSquare = square;
             }
         } else {
@@ -49,7 +49,7 @@ class ChessGUI extends JFrame {
 
             for (Move move : legalMovesFromSelected) {
                 if (move.to == square) {
-                    System.out.println("⬅️ " + (Game.isWhiteTurn ? "Hvid" : "Sort") + " udfører træk: " + move);
+                    System.out.println("⬅️ Hvid udfører træk: " + move);
 
                     if (move.isEnPassant) {
                         System.out.println("🔥 En passant bliver udført!");
@@ -62,13 +62,13 @@ class ChessGUI extends JFrame {
                     }
 
                     int captured = Game.makeMove(move);
-                    System.out.println("➡️ Nu er det " + (Game.isWhiteTurn ? "hvid" : "sort") + "s tur");
+                    System.out.println("➡️ Nu er det sort (AI)'s tur");
 
                     // Promotion
                     int movedPiece = Game.board[move.to];
                     if (Math.abs(movedPiece) == MoveGenerator.PAWN) {
                         int rank = move.to >> 4;
-                        if ((rank == 7 && movedPiece > 0) || (rank == 0 && movedPiece < 0)) {
+                        if (rank == 7) {
                             String[] options = { "Dronning", "Tårn", "Løber", "Springer" };
                             int choice = JOptionPane.showOptionDialog(this, "Vælg forvandling",
                                     "Bonde forvandles", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE,
@@ -80,21 +80,41 @@ class ChessGUI extends JFrame {
                                 case 3 -> MoveGenerator.KNIGHT;
                                 default -> MoveGenerator.QUEEN;
                             };
-                            Game.board[move.to] = movedPiece > 0 ? newPiece : -newPiece;
+                            Game.board[move.to] = newPiece;
                             System.out.println("♛ Promotion til: " + options[choice]);
                         }
                     }
 
-                    // Skakmat/patt
+                    // Skakmat/patt for mennesket (hvid)
                     List<Move> nextMoves = Game.generateLegalMoves();
                     if (nextMoves.isEmpty()) {
                         if (Game.isInCheck()) {
-                            JOptionPane.showMessageDialog(this, (Game.isWhiteTurn ? "Hvid" : "Sort") + " er mat!");
+                            JOptionPane.showMessageDialog(this, "Sort vinder – hvid er mat!");
                         } else if (Game.isDrawByStalemate()) {
                             JOptionPane.showMessageDialog(this, "Patt! Uafgjort.");
                         }
                     }
 
+                    // 👾 AI trækker som sort
+                    if (!Game.isWhiteTurn) {
+                        Move aiMove = AI.findBestMove(4); // dybde 4
+                        if (aiMove != null) {
+                            System.out.println("🤖 Sort (AI) trækker: " + aiMove);
+                            Game.makeMove(aiMove);
+                        }
+
+                        // Tjek om hvid nu er mat eller i patt
+                        List<Move> playerMoves = Game.generateLegalMoves();
+                        if (playerMoves.isEmpty()) {
+                            if (Game.isInCheck()) {
+                                JOptionPane.showMessageDialog(this, "Hvid er mat – sort vinder!");
+                            } else if (Game.isDrawByStalemate()) {
+                                JOptionPane.showMessageDialog(this, "Patt! Uafgjort.");
+                            }
+                        }
+                    }
+
+                    drawBoard(); // opdater GUI efter AI-træk også
                     break;
                 }
             }
@@ -108,6 +128,7 @@ class ChessGUI extends JFrame {
 
 
 
+
     void drawBoard() {
         boardPanel.removeAll();
 
@@ -116,7 +137,8 @@ class ChessGUI extends JFrame {
         Color darkSquare = new Color(181, 136, 99);     // brun
         Color selectedColor = new Color(255, 255, 153); // gul markering
 
-        Font chessFont = new Font("Arial", Font.PLAIN, 32);
+        Font chessFont = new Font("Segoe UI Symbol", Font.PLAIN, 32);
+
 
         for (int rank = 7; rank >= 0; rank--) {
             for (int file = 0; file < 8; file++) {
