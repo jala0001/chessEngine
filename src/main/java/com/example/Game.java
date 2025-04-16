@@ -251,8 +251,8 @@ public class Game {
         if (move.isEnPassant) {
             int epPawnSquare = move.to + (movedPiece > 0 ? -16 : 16);
             captured = board[epPawnSquare];
-            System.out.println("🔥 En passant! Fjerner fjendtlig bonde på: " + MoveGenerator.squareToCoord(epPawnSquare));
-            System.out.println("   Bonden flyttes fra " + MoveGenerator.squareToCoord(move.from) + " til " + MoveGenerator.squareToCoord(move.to));
+          //  System.out.println("🔥 En passant! Fjerner fjendtlig bonde på: " + MoveGenerator.squareToCoord(epPawnSquare));
+          //  System.out.println("   Bonden flyttes fra " + MoveGenerator.squareToCoord(move.from) + " til " + MoveGenerator.squareToCoord(move.to));
             board[epPawnSquare] = 0;
         } else {
             captured = board[move.to];

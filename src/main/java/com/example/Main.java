@@ -7,17 +7,17 @@ public class Main {
         Game.loadFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 
         // Evaluér stillingen og skriv til konsollen
-        System.out.println("Evaluering af stilling: " + AI.evaluatePosition());
+         System.out.println("Evaluering af stilling: " + AI.evaluatePosition());
 
         // Kør en alpha-beta evaluering på depth 3
         int score = AI.alphaBeta(6, Integer.MIN_VALUE, Integer.MAX_VALUE, true);
-        System.out.println("Alpha-beta evaluering (depth 3): " + score);
+         System.out.println("Alpha-beta evaluering (depth 3): " + score);
 
         // Display the initial board state in the console
         printBoard();
 
-        Move aiBestMove = AI.findBestMove(3);
-        System.out.println("Bedste træk for AI (hvid): " + aiBestMove);
+        //Move aiBestMove = AI.findBestMove(3);
+        // System.out.println("Bedste træk for AI (hvid): " + aiBestMove);
 
 
         // Launch the graphical user interface
