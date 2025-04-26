@@ -374,7 +374,7 @@ public class Game {
     }
 
     public static boolean isDrawByStalemate() {
-        return generateLegalMoves().isEmpty() && !isInCheck();
+        return generateLegalMoves().isEmpty() && !isCurrentPlayerInCheck();
     }
 
 
