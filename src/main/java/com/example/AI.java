@@ -139,8 +139,11 @@ public class AI {
             // Positionel bonus via piece-square tables
             int rank = i >> 4; // Række
             int file = i & 7;  // Linje
-            // Flip indeks for sorte brikker, da PST er fra hvids perspektiv
-            int index = (piece > 0) ? (rank * 8 + file) : ((7 - rank) * 8 + file);
+            // - Hvide brikker bruger PST som “bund” = rank 0 → PST[56..63], dvs. (7-rank)*8+file
+            // - Sorte brikker bruger PST spejlvendt: rank 0 (bund for sort) → PST[0..7], dvs. rank*8+file
+            int index = (piece > 0)
+                    ? ((7 - rank) * 8 + file) //hvid
+                    : (rank * 8 + file);      //sort
 
             switch (Math.abs(piece)) {
                 case MoveGenerator.PAWN -> positionScore += (piece > 0 ? pawnPST[index] : -pawnPST[index]);
@@ -977,9 +980,8 @@ public class AI {
      * @param moves Listen af træk der skal sorteres
      * @return Sorteret liste med "mest lovende" træk først
      */
-    private static List<Move> sortMoves(List<Move> moves) {
+    private static void sortMoves(List<Move> moves) {
         moves.sort((a, b) -> Integer.compare(moveScore(b), moveScore(a)));
-        return moves;
     }
 
     /**
@@ -1071,7 +1073,7 @@ public class AI {
 
         // Generer og sortér træk (move ordering)
         List<Move> moves = Game.generateLegalMoves();
-        moves = sortMoves(moves);
+        sortMoves(moves);
 
         if (maximizingPlayer) {
             int maxEval = Integer.MIN_VALUE;
@@ -1117,9 +1119,15 @@ public class AI {
      * @return Det bedste fundne træk
      */
     public static Move findBestMove(int depth) {
+        // 1) Generér alle lovlige træk
         List<Move> legalMoves = Game.generateLegalMoves();
+
+        // 2) Sortér dem med MVV‑LVA (Most Valuable Victim – Least Valuable Attacker)
+        sortMoves(legalMoves);
+
+        boolean isMaximizingRoot = Game.isWhiteTurn;
         Move bestMove = null;
-        int bestScore = Integer.MIN_VALUE;
+        int bestScore = isMaximizingRoot ? Integer.MIN_VALUE : Integer.MAX_VALUE;
 
         System.out.println("\n===== AI MOVE SELECTION (DEPTH " + depth + ") =====");
         System.out.println("Current position evaluation before AI's move:");
@@ -1132,9 +1140,9 @@ public class AI {
             for (int[] piece : threatenedPieces) {
                 int square = piece[0];
                 int value = piece[1];
-                int pieceType = Math.abs(Game.board[square]);
-                System.out.println("  - " + getPieceName(Game.board[square]) + " (value: " + value +
-                        ") at " + MoveGenerator.squareToCoord(square));
+                System.out.println("  - " + getPieceName(Game.board[square]) +
+                        " (value: " + value + ") at " +
+                        MoveGenerator.squareToCoord(square));
             }
         }
 
@@ -1150,18 +1158,14 @@ public class AI {
             for (int[] threatened : threatenedPieces) {
                 if (move.from == threatened[0]) {
                     savesThreatenedPiece = true;
-
-                    // Giv kun redninsbonus hvis destinationen er sikker
                     boolean destSafe = !isDestinationAttackedAfterMove(move);
-
                     if (destSafe) {
-                        // Bonus = brikværdi * 1.5 (vægtet til at prioritere redning af værdifulde brikker)
                         rescueBonus = (int)(threatened[1] * 1.5);
                         System.out.println("💡 Move " + move + " SAVES threatened " +
                                 getPieceName(movedPiece) + " (bonus: +" + rescueBonus + ")");
                     } else {
-                        System.out.println("❌ Move " + move + " tries to save " + getPieceName(movedPiece) +
-                                " but destination is not safe");
+                        System.out.println("❌ Move " + move + " tries to save " +
+                                getPieceName(movedPiece) + " but destination is not safe");
                     }
                     break;
                 }
@@ -1175,58 +1179,61 @@ public class AI {
 
             // *** VIGTIGT: TJEK OM DESTINATIONEN VIL VÆRE UNDER ANGREB EFTER TRÆKKET ***
             boolean destUnderAttack = isDestinationAttackedAfterMove(move);
-
             if (destUnderAttack) {
                 safetyPenalty = Math.abs(getPieceValue(movedPiece));
-                System.out.println("⚠️ Move " + move + " puts " + getPieceName(movedPiece) +
-                        " in danger at " + MoveGenerator.squareToCoord(move.to));
+                System.out.println("⚠️ Move " + move + " puts " +
+                        getPieceName(movedPiece) + " in danger at " +
+                        MoveGenerator.squareToCoord(move.to));
             }
 
-            // Evaluer position
+            // Evaluer position via alphaBeta
             int captured = Game.makeMove(move);
-            int score = alphaBeta(depth - 1, Integer.MIN_VALUE, Integer.MAX_VALUE, false);
+            boolean nextIsMaximizing = !isMaximizingRoot;
+            int score = alphaBeta(depth - 1,
+                    Integer.MIN_VALUE,
+                    Integer.MAX_VALUE,
+                    nextIsMaximizing);
             Game.undoMove(move, captured);
 
-            // Tilføj redningsbonus og sikkerhedsstraf
-            score += rescueBonus;
-            score -= safetyPenalty;
+            // **2) side** (+1=hvid, −1=sort)
+            int side = (movedPiece > 0) ? +1 : -1;
 
-            // Beregn capture-bonus
+            // **1) rescue‐bonus**
+            score += side * rescueBonus;
+
+            // **3) safety‐penalty** (trækker for hvid, tilføjer for sort)
+            score -= side * safetyPenalty;
+
+            // **4) capture‐bonus** (tilføj/træk med korrekt fortegn)
             if (targetPiece != 0) {
                 captureBonus = Math.abs(getPieceValue(targetPiece));
 
-                // Tilføj kun bonus hvis slaget er sikkert (eller hvis byttet er fordelagtigt)
                 if (!destUnderAttack) {
                     if (capturedPieceDefended) {
-                        // Hvis brikken er forsvaret, evaluer byttet
                         int exchangeValue = captureBonus - Math.abs(getPieceValue(movedPiece));
                         System.out.println("   ⚠️ Exchange evaluation: " + exchangeValue +
                                 " (captures " + getPieceName(targetPiece) + " worth " + captureBonus +
                                 " but risks " + getPieceName(movedPiece) + " worth " +
                                 Math.abs(getPieceValue(movedPiece)) + ")");
-
-                        // Tilføj kun delvis bonus for lige bytte, fuld bonus for fordelagtige
                         if (exchangeValue >= 0) {
-                            score += exchangeValue + 10; // Lille bonus for lige bytte
+                            score += side * (exchangeValue + 10);
                         } else {
-                            // Streng straf for ufordelagtige bytte
-                            score += exchangeValue * 2;
+                            score += side * (exchangeValue * 2);
                         }
                     } else {
-                        score += captureBonus;
+                        score += side * captureBonus;
                     }
                 } else {
                     int exchangeValue = captureBonus - safetyPenalty;
                     System.out.println("   ⚠️ Exchange evaluation: " + exchangeValue +
                             " (captures " + getPieceName(targetPiece) + " worth " + captureBonus +
                             " but loses " + getPieceName(movedPiece) + " worth " + safetyPenalty + ")");
-
-                    // Tilføj kun nettoværdien af byttet hvis den er positiv
                     if (exchangeValue > 0) {
-                        score += exchangeValue;
+                        score += side * exchangeValue;
                     }
                 }
             }
+
 
             // Formater og udskriv trækinformation
             System.out.printf("Move: %-8s Base score: %-6d", move, score - captureBonus - rescueBonus);
@@ -1248,22 +1255,24 @@ public class AI {
             }
             System.out.printf(" Final score: %-6d\n", score);
 
-            if (score > bestScore || bestMove == null) {
+            // Opdater bestMove med korrekt max/min‑logik
+            if (bestMove == null ||
+                    (isMaximizingRoot && score >  bestScore) ||
+                    (!isMaximizingRoot && score <  bestScore)) {
                 bestScore = score;
-                bestMove = move;
+                bestMove  = move;
             }
         }
 
         System.out.println("\n✓ SELECTED: " + bestMove + " with score: " + bestScore);
 
-        // Vis evaluering efter trækket er udført
+        // Vis evaluering efter det valgte træk
         if (bestMove != null) {
             int captured = Game.makeMove(bestMove);
             System.out.println("\nPosition evaluation after AI's selected move:");
             evaluatePosition(true);
             Game.undoMove(bestMove, captured);
 
-            // Sidste sikkerhedstjek for det valgte træk
             if (isDestinationAttackedAfterMove(bestMove)) {
                 System.out.println("\n⚠️ WARNING: The selected move puts a piece in immediate danger!");
             }
