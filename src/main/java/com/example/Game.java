@@ -113,6 +113,9 @@ public class Game {
     }
 
     private static boolean canCastleQueenside(boolean white) {
+        if (isCurrentPlayerInCheck()) {
+            return false;
+        }
         if (white) {
             return !whiteKingMoved && !whiteQueensideRookMoved &&
                     board[1] == 0 && board[2] == 0 && board[3] == 0 &&
