@@ -4,11 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="05abe853-bca5-4c1a-b6c5-08cd798a7c55" name="Changes" comment="GUI lir">
+    <list default="true" id="05abe853-bca5-4c1a-b6c5-08cd798a7c55" name="Changes" comment="updated draw by stalemate logic">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/AI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/AI.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/ChessGUI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/ChessGUI.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/Game.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/Game.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/Main.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -152,7 +150,23 @@
       <option name="project" value="LOCAL" />
       <updated>1744204639054</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="implimented new reversen isincheck method so checkmate now works proper and changed values in evaluation in ai and math in findbestmove so it matches negative logic for black">
+      <option name="closed" value="true" />
+      <created>1745665662524</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1745665662524</updated>
+    </task>
+    <task id="LOCAL-00006" summary="updated draw by stalemate logic">
+      <option name="closed" value="true" />
+      <created>1745665779371</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1745665779371</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -163,6 +177,8 @@
     <MESSAGE value="refactored" />
     <MESSAGE value="now possible to check" />
     <MESSAGE value="GUI lir" />
-    <option name="LAST_COMMIT_MESSAGE" value="GUI lir" />
+    <MESSAGE value="implimented new reversen isincheck method so checkmate now works proper and changed values in evaluation in ai and math in findbestmove so it matches negative logic for black" />
+    <MESSAGE value="updated draw by stalemate logic" />
+    <option name="LAST_COMMIT_MESSAGE" value="updated draw by stalemate logic" />
   </component>
 </project>
