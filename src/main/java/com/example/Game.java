@@ -35,6 +35,25 @@ public class Game {
         return isSquareAttacked(kingSquare, !whiteToCheck);
     }
 
+    // Tjek om den aktuelle spiller (den der skal flytte nu) er i skak
+    static boolean isCurrentPlayerInCheck() {
+        boolean whiteToCheck = isWhiteTurn;  // Spilleren der skal flytte nu (den, der er i skak, hvis den er truet)
+        int kingSquare = -1;
+        int kingValue = whiteToCheck ? MoveGenerator.KING : -MoveGenerator.KING;
+
+        for (int i = 0; i < 128; i++) {
+            if ((i & 0x88) != 0) continue;
+            if (Game.board[i] == kingValue) {
+                kingSquare = i;
+                break;
+            }
+        }
+
+        if (kingSquare == -1) return true;
+
+        return isSquareAttacked(kingSquare, !whiteToCheck); // Vi tjekker om modstanderen truer kongen
+    }
+
 
 
     public static List<Move> generateLegalMoves() {
@@ -73,6 +92,9 @@ public class Game {
     }
 
     private static boolean canCastleKingside(boolean white) {
+        if (isCurrentPlayerInCheck()) {
+            return false;
+        }
         if (white) {
             return !whiteKingMoved && !whiteKingsideRookMoved &&
                     board[5] == 0 && board[6] == 0 &&
@@ -355,7 +377,7 @@ public class Game {
     }
 
     public static boolean isDrawByStalemate() {
-        return generateLegalMoves().isEmpty() && !isInCheck();
+        return generateLegalMoves().isEmpty() && !isCurrentPlayerInCheck();
     }
 
 

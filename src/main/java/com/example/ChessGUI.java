@@ -88,8 +88,8 @@ class ChessGUI extends JFrame {
                     // Skakmat/patt for mennesket (hvid)
                     List<Move> nextMoves = Game.generateLegalMoves();
                     if (nextMoves.isEmpty()) {
-                        if (Game.isInCheck()) {
-                            JOptionPane.showMessageDialog(this, "Sort vinder – hvid er mat!");
+                        if (Game.isCurrentPlayerInCheck()) {
+                            JOptionPane.showMessageDialog(this, "Hvid vinder – sort er mat!");
                         } else if (Game.isDrawByStalemate()) {
                             JOptionPane.showMessageDialog(this, "Patt! Uafgjort.");
                         }
@@ -106,8 +106,8 @@ class ChessGUI extends JFrame {
                         // Tjek om hvid nu er mat eller i patt
                         List<Move> playerMoves = Game.generateLegalMoves();
                         if (playerMoves.isEmpty()) {
-                            if (Game.isInCheck()) {
-                                JOptionPane.showMessageDialog(this, "Hvid er mat – sort vinder!");
+                            if (Game.isCurrentPlayerInCheck()) {
+                                JOptionPane.showMessageDialog(this, "Sort er mat – sort vinder!");
                             } else if (Game.isDrawByStalemate()) {
                                 JOptionPane.showMessageDialog(this, "Patt! Uafgjort.");
                             }
@@ -137,7 +137,7 @@ class ChessGUI extends JFrame {
         Color darkSquare = new Color(181, 136, 99);     // brun
         Color selectedColor = new Color(255, 255, 153); // gul markering
 
-        Font chessFont = new Font("Segoe UI Symbol", Font.PLAIN, 32);
+        Font chessFont = new Font("Ariel", Font.PLAIN, 32);
 
 
         for (int rank = 7; rank >= 0; rank--) {
