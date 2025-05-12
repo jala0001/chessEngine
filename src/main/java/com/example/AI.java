@@ -1277,6 +1277,7 @@ public class AI {
                 System.out.println("\n⚠️ WARNING: The selected move puts a piece in immediate danger!");
             }
         }
+        System.out.println("ksfhdso");
 
         return bestMove;
     }
