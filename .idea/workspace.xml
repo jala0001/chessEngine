@@ -5,10 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="05abe853-bca5-4c1a-b6c5-08cd798a7c55" name="Changes" comment="updated draw by stalemate logic + GUI lir">
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/Evaluation.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/Search.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/ThreatDetector.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/example/AI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/AI.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/example/ChessGUI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/ChessGUI.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/example/Game.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/Game.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/Main.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -36,55 +40,47 @@
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory">
-    {
+  <component name="GitHubPullRequestSearchHistory">{
     &quot;lastFilter&quot;: {
     &quot;state&quot;: &quot;OPEN&quot;,
     &quot;assignee&quot;: &quot;jala0001&quot;
     }
-    }
-  </component>
-  <component name="GithubPullRequestsUISettings">
-    {
+    }</component>
+  <component name="GithubPullRequestsUISettings">{
     &quot;selectedUrlAndAccountId&quot;: {
     &quot;url&quot;: &quot;https://github.com/jala0001/chessEngine.git&quot;,
     &quot;accountId&quot;: &quot;e43b2dee-dddc-4305-b716-eb3b9bea4dd9&quot;
     }
-    }
-  </component>
+    }</component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
-  <component name="ProjectColorInfo">
-    {
+  <component name="ProjectColorInfo">{
     &quot;associatedIndex&quot;: 2
-    }
-  </component>
+    }</component>
   <component name="ProjectId" id="2ul4vANKZgDK56afTPS5EcZm7t2" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">
-    {
-    &quot;keyToString&quot;: {
-    &quot;Application.Main.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;Merging main&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
-    }
-    }
-  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.Main.executor": "Run",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "git-widget-placeholder": "main",
+    "kotlin-language-version-configured": "true",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
   <component name="RecentsManager">
     <key name="MoveMembersDialog.RECENTS_KEY">
       <recent name="com.example.MoveGenerator" />
@@ -114,7 +110,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="jdk-21.0.2-openjdk-21.0.2-4caba194b151-4f524021" />
+        <option value="jdk-21.0.2-openjdk-21.0.2-4caba194b151-322ed176" />
       </set>
     </attachedChunks>
   </component>
@@ -134,6 +130,7 @@
       <workItem from="1745177740387" duration="304000" />
       <workItem from="1745252072864" duration="2000" />
       <workItem from="1746695446784" duration="118000" />
+      <workItem from="1747045627206" duration="2050000" />
     </task>
     <task id="LOCAL-00001" summary="created board with castle, en passant working and simple gui">
       <option name="closed" value="true" />

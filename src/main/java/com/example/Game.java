@@ -119,6 +119,11 @@ public class Game {
         }
     }
 
+    public static void reset() {
+        // Standard start-FEN: hvide trækker, alle rokaderettigheder, ingen en passant
+        loadFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -");
+    }
+
     public static void changeTurn() {
         isWhiteTurn = !isWhiteTurn;
     }

@@ -5,15 +5,12 @@ import javax.swing.*;
 public class Main {
 
     public static void main(String[] args) {
-        // Vis fargevalg dialog
-        boolean playerIsWhite = ChessGUI.showColorSelectionDialog();
-        Game.setPlayerColor(playerIsWhite);
 
         // Initialize the board
         Game.loadFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 
         // Print initial evaluation
-        System.out.println("Evaluering af stilling: " + AI.evaluatePosition());
+        System.out.println("Evaluering af stilling: " + Evaluation.evaluatePosition());
 
         // Display the initial board
         printBoard();
