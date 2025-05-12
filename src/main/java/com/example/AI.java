@@ -8,6 +8,7 @@ import java.util.List;
  * AI-klassen implementerer skak-motoren, som beregner og vælger træk.
  * Den indeholder evalueringsfunktioner, søgealgoritmer og sikkerhedskontroller.
  */
+
 public class AI {
 
     // ===== PIECE-SQUARE TABLES =====
@@ -1110,26 +1111,51 @@ public class AI {
         }
     }
 
-    /**
-     * Finder det bedste træk for den aktuelle spiller.
-     * Kombinerer alpha-beta søgning med avancerede sikkerhedstjek.
-     * Prioriterer redning af truede brikker og sikre slag.
-     *
-     * @param depth Søgedybden for AI'ens beregninger
-     * @return Det bedste fundne træk
-     */
-    public static Move findBestMove(int depth) {
-        // 1) Generér alle lovlige træk
+
+    public static Move findBestMove(int maxDepth) {
         List<Move> legalMoves = Game.generateLegalMoves();
 
-        // 2) Sortér dem med MVV‑LVA (Most Valuable Victim – Least Valuable Attacker)
+        // Sortér dem med MVV-LVA (Most Valuable Victim – Least Valuable Attacker)
         sortMoves(legalMoves);
 
+        Move bestMove = null;
+        Move bestMoveAtDepth = null;
+        int bestScoreAtDepth = 0;
+
+        // Iterativ deepening
+        for (int depth = 1; depth <= maxDepth; depth++) {
+            System.out.println("\n===== ITERATIVE DEEPENING - DEPTH " + depth + " =====");
+
+            bestMoveAtDepth = findBestMoveAtDepth(depth, legalMoves);
+
+            if (bestMoveAtDepth != null) {
+                bestMove = bestMoveAtDepth;
+
+                // Evaluer det valgte træk
+                int captured = Game.makeMove(bestMove);
+                boolean isMaximizingRoot = Game.isWhiteTurn;
+                bestScoreAtDepth = evaluatePosition();
+                Game.undoMove(bestMove, captured);
+
+                System.out.println("✓ BEST MOVE AT DEPTH " + depth + ": " + bestMove +
+                        " with score: " + bestScoreAtDepth);
+            }
+
+            // Opdater move-rækkefølgen baseret på det bedste træk
+            // Dette forbedrer alpha-beta cutoffs i næste iteration
+            if (bestMove != null) {
+                reorderMovesBasedOnPreviousSearch(legalMoves, bestMove);
+            }
+        }
+
+        return bestMove;
+    }
+
+    private static Move findBestMoveAtDepth(int depth, List<Move> moves) {
         boolean isMaximizingRoot = Game.isWhiteTurn;
         Move bestMove = null;
         int bestScore = isMaximizingRoot ? Integer.MIN_VALUE : Integer.MAX_VALUE;
 
-        System.out.println("\n===== AI MOVE SELECTION (DEPTH " + depth + ") =====");
         System.out.println("Current position evaluation before AI's move:");
         evaluatePosition(true);
 
@@ -1146,7 +1172,7 @@ public class AI {
             }
         }
 
-        for (Move move : legalMoves) {
+        for (Move move : moves) {
             int movedPiece = Game.board[move.from];
             int targetPiece = Game.board[move.to];
             int captureBonus = 0;
@@ -1234,7 +1260,6 @@ public class AI {
                 }
             }
 
-
             // Formater og udskriv trækinformation
             System.out.printf("Move: %-8s Base score: %-6d", move, score - captureBonus - rescueBonus);
             if (targetPiece != 0) {
@@ -1277,8 +1302,16 @@ public class AI {
                 System.out.println("\n⚠️ WARNING: The selected move puts a piece in immediate danger!");
             }
         }
-        System.out.println("ksfhdso");
 
         return bestMove;
+    }
+
+    // Hjælpemetode til at forbedre move-ordering mellem iterationer
+    private static void reorderMovesBasedOnPreviousSearch(List<Move> moves, Move bestMove) {
+        if (bestMove == null) return;
+
+        // Flyt det bedste træk først i listen
+        moves.remove(bestMove);
+        moves.add(0, bestMove);
     }
 }

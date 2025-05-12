@@ -16,6 +16,13 @@ public class Game {
     public static boolean blackKingMoved = false;
     public static boolean blackKingsideRookMoved = false;
     public static boolean blackQueensideRookMoved = false;
+    public static boolean playerIsWhite = true; // Default: spilleren er hvid
+    public static boolean aiPlaysFirst = false; // Holder styr på, om AI skal trække først
+
+    public static void setPlayerColor(boolean isWhite) {
+        playerIsWhite = isWhite;
+        aiPlaysFirst = !isWhite; // Hvis spilleren er sort, skal AI (hvid) trække først
+    }
 
     static boolean isInCheck() {
         boolean whiteToCheck = !isWhiteTurn;  // <- den spiller der lige HAR flyttet
@@ -110,6 +117,10 @@ public class Game {
                     !isSquareAttacked(117, true) &&
                     !isSquareAttacked(118, true);
         }
+    }
+
+    public static void changeTurn() {
+        isWhiteTurn = !isWhiteTurn;
     }
 
     private static boolean canCastleQueenside(boolean white) {
@@ -276,8 +287,8 @@ public class Game {
         if (move.isEnPassant) {
             int epPawnSquare = move.to + (movedPiece > 0 ? -16 : 16);
             captured = board[epPawnSquare];
-          //  System.out.println("🔥 En passant! Fjerner fjendtlig bonde på: " + MoveGenerator.squareToCoord(epPawnSquare));
-          //  System.out.println("   Bonden flyttes fra " + MoveGenerator.squareToCoord(move.from) + " til " + MoveGenerator.squareToCoord(move.to));
+            //  System.out.println("🔥 En passant! Fjerner fjendtlig bonde på: " + MoveGenerator.squareToCoord(epPawnSquare));
+            //  System.out.println("   Bonden flyttes fra " + MoveGenerator.squareToCoord(move.from) + " til " + MoveGenerator.squareToCoord(move.to));
             board[epPawnSquare] = 0;
         } else {
             captured = board[move.to];

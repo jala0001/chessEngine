@@ -29,8 +29,10 @@ class ChessGUI extends JFrame {
 
         if (selectedSquare == -1) {
             // Kun tjek tur når spiller vælger brik
-            if ((Game.isWhiteTurn && piece > 0)) {
+            if ((Game.isWhiteTurn && piece > 0 && Game.playerIsWhite) ||
+                    (!Game.isWhiteTurn && piece < 0 && !Game.playerIsWhite)) {
                 selectedSquare = square;
+                drawBoard(); // Opdater GUI for at vise markering
             }
         } else {
             List<Move> allMoves = Game.generateLegalMoves();
@@ -49,7 +51,9 @@ class ChessGUI extends JFrame {
 
             for (Move move : legalMovesFromSelected) {
                 if (move.to == square) {
-                    System.out.println("⬅️ Hvid udfører træk: " + move);
+                    String playerName = Game.playerIsWhite ? "Hvid" : "Sort";
+                    String playerType = Game.isWhiteTurn == Game.playerIsWhite ? "mennesket" : "AI'en";
+                    System.out.println("⬅️ " + playerName + " (" + playerType + ") udfører træk: " + move);
 
                     if (move.isEnPassant) {
                         System.out.println("🔥 En passant bliver udført!");
@@ -62,13 +66,16 @@ class ChessGUI extends JFrame {
                     }
 
                     int captured = Game.makeMove(move);
-                    System.out.println("➡️ Nu er det sort (AI)'s tur");
+                    System.out.println("➡️ Nu er det " + (Game.isWhiteTurn ? "hvid" : "sort") + "'s tur");
 
-                    // Promotion
+                    // Promotion - kun for spillerens bønder
                     int movedPiece = Game.board[move.to];
                     if (Math.abs(movedPiece) == MoveGenerator.PAWN) {
                         int rank = move.to >> 4;
-                        if (rank == 7) {
+                        boolean shouldPromote = (Game.playerIsWhite && movedPiece > 0 && rank == 7) ||
+                                (!Game.playerIsWhite && movedPiece < 0 && rank == 0);
+
+                        if (shouldPromote) {
                             String[] options = { "Dronning", "Tårn", "Løber", "Springer" };
                             int choice = JOptionPane.showOptionDialog(this, "Vælg forvandling",
                                     "Bonde forvandles", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE,
@@ -80,41 +87,48 @@ class ChessGUI extends JFrame {
                                 case 3 -> MoveGenerator.KNIGHT;
                                 default -> MoveGenerator.QUEEN;
                             };
-                            Game.board[move.to] = newPiece;
+
+                            // Sæt korrekt farve på det promoverede stykke
+                            Game.board[move.to] = Game.playerIsWhite ? newPiece : -newPiece;
                             System.out.println("♛ Promotion til: " + options[choice]);
                         }
                     }
 
-                    // Skakmat/patt for mennesket (hvid)
+                    // Skakmat/patt tjek
                     List<Move> nextMoves = Game.generateLegalMoves();
                     if (nextMoves.isEmpty()) {
                         if (Game.isCurrentPlayerInCheck()) {
-                            JOptionPane.showMessageDialog(this, "Hvid vinder – sort er mat!");
+                            String winner = Game.isWhiteTurn ? "Sort" : "Hvid";
+                            String loser = Game.isWhiteTurn ? "Hvid" : "Sort";
+                            JOptionPane.showMessageDialog(this, winner + " vinder – " + loser + " er mat!");
                         } else if (Game.isDrawByStalemate()) {
                             JOptionPane.showMessageDialog(this, "Patt! Uafgjort.");
                         }
                     }
 
-                    // 👾 AI trækker som sort
-                    if (!Game.isWhiteTurn) {
-                        Move aiMove = AI.findBestMove(4); // dybde 4
+                    // 👾 AI trækker når det er AI's tur
+                    if ((Game.isWhiteTurn && !Game.playerIsWhite) || (!Game.isWhiteTurn && Game.playerIsWhite)) {
+                        Move aiMove = AI.findBestMove(4); // dybde 5
                         if (aiMove != null) {
-                            System.out.println("🤖 Sort (AI) trækker: " + aiMove);
+                            String aiColor = Game.isWhiteTurn ? "Hvid" : "Sort";
+                            System.out.println("🤖 " + aiColor + " (AI) trækker: " + aiMove);
                             Game.makeMove(aiMove);
-                        }
 
-                        // Tjek om hvid nu er mat eller i patt
-                        List<Move> playerMoves = Game.generateLegalMoves();
-                        if (playerMoves.isEmpty()) {
-                            if (Game.isCurrentPlayerInCheck()) {
-                                JOptionPane.showMessageDialog(this, "Sort er mat – sort vinder!");
-                            } else if (Game.isDrawByStalemate()) {
-                                JOptionPane.showMessageDialog(this, "Patt! Uafgjort.");
+                            // Tjek om spilleren nu er mat eller i patt
+                            List<Move> playerMoves = Game.generateLegalMoves();
+                            if (playerMoves.isEmpty()) {
+                                if (Game.isCurrentPlayerInCheck()) {
+                                    String winner = Game.isWhiteTurn ? "Sort" : "Hvid";
+                                    String loser = Game.isWhiteTurn ? "Hvid" : "Sort";
+                                    JOptionPane.showMessageDialog(this, winner + " vinder – " + loser + " er mat!");
+                                } else if (Game.isDrawByStalemate()) {
+                                    JOptionPane.showMessageDialog(this, "Patt! Uafgjort.");
+                                }
                             }
                         }
                     }
 
-                    drawBoard(); // opdater GUI efter AI-træk også
+                    drawBoard(); // opdater GUI efter træk
                     break;
                 }
             }
@@ -139,9 +153,15 @@ class ChessGUI extends JFrame {
 
         Font chessFont = new Font("Ariel", Font.PLAIN, 32);
 
+        // Find ud af hvilken retning vi skal tegne brættet
+        boolean reverseBoard = !Game.playerIsWhite;
 
-        for (int rank = 7; rank >= 0; rank--) {
-            for (int file = 0; file < 8; file++) {
+        for (int rankIndex = 0; rankIndex < 8; rankIndex++) {
+            for (int fileIndex = 0; fileIndex < 8; fileIndex++) {
+                // Find den rigtige række og linje afhængigt af spillerens perspektiv
+                int rank = reverseBoard ? rankIndex : (7 - rankIndex);
+                int file = reverseBoard ? (7 - fileIndex) : fileIndex;
+
                 int square = rank * 16 + file;
                 int piece = Game.board[square];
 
@@ -162,6 +182,7 @@ class ChessGUI extends JFrame {
                     tile.setForeground(Color.DARK_GRAY);
                 }
 
+                // RETTELSE: Feltfarven skal beregnes fra den faktiske skakbrætsposition
                 boolean isDark = (rank + file) % 2 == 0;
                 Color baseColor = isDark ? darkSquare : lightSquare;
                 tile.setBackground(baseColor);
@@ -200,6 +221,76 @@ class ChessGUI extends JFrame {
 
         boardPanel.revalidate();
         boardPanel.repaint();
+    }
+
+    // Hjælpemetode til at oprette en brikkefelt
+    private JButton createTile(int piece, int square, int rank, int file, Color selectedColor, Font chessFont, Color lightSquare, Color darkSquare) {
+        JButton tile = new JButton(getPieceSymbol(piece));
+        tile.setFont(chessFont);
+        tile.setFocusPainted(false);
+        tile.setBorderPainted(false);
+        tile.setOpaque(true);
+        tile.setMargin(new Insets(2, 2, 2, 2));
+        tile.setContentAreaFilled(true);
+
+        // 🎨 Sæt tekstfarve
+        if (piece > 0) {
+            tile.setForeground(Color.WHITE);
+        } else if (piece < 0) {
+            tile.setForeground(Color.BLACK);
+        } else {
+            tile.setForeground(Color.DARK_GRAY);
+        }
+
+        boolean isDark = (rank + file) % 2 == 0;
+        Color baseColor = isDark ? darkSquare : lightSquare;
+        tile.setBackground(baseColor);
+
+        // ✨ Marker valgt felt
+        if (square == selectedSquare) {
+            tile.setBackground(selectedColor);
+            tile.setBorder(new LineBorder(Color.YELLOW, 3));
+        } else {
+            tile.setBorder(null);
+        }
+
+        final int clickedSquare = square;
+
+        // 🖱️ Klik
+        tile.addActionListener(e -> handleClick(clickedSquare));
+
+        // 🌈 Hover-effekt
+        tile.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                tile.setBackground(tile.getBackground().brighter());
+            }
+
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                if (clickedSquare == selectedSquare) {
+                    tile.setBackground(selectedColor);
+                } else {
+                    tile.setBackground(baseColor);
+                }
+            }
+        });
+
+        return tile;
+    }
+
+    public static boolean showColorSelectionDialog() {
+        String[] options = {"Spil som Hvid", "Spil som Sort"};
+        int choice = JOptionPane.showOptionDialog(
+                null,
+                "Vælg din farve",
+                "Farvevalg",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                options,
+                options[0]
+        );
+
+        return choice == 0; // True hvis hvid vælges
     }
 
 

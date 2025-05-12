@@ -4,16 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-<<<<<<< HEAD
-    <list default="true" id="05abe853-bca5-4c1a-b6c5-08cd798a7c55" name="Changes" comment="updated draw by stalemate logic">
+    <list default="true" id="05abe853-bca5-4c1a-b6c5-08cd798a7c55" name="Changes" comment="updated draw by stalemate logic + GUI lir">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/example/AI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/AI.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/example/ChessGUI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/ChessGUI.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/example/Game.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/Game.java" afterDir="false" />
-=======
-    <list default="true" id="05abe853-bca5-4c1a-b6c5-08cd798a7c55" name="Changes" comment="GUI lir">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
->>>>>>> 735bff9764535fc432981d703a985736bf321b08
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -41,38 +36,39 @@
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-<<<<<<< HEAD
-  <component name="GitHubPullRequestSearchHistory">{&quot;lastFilter&quot;:{&quot;state&quot;:&quot;OPEN&quot;,&quot;assignee&quot;:&quot;jala0001&quot;}}</component>
-  <component name="GithubPullRequestsUISettings">{&quot;selectedUrlAndAccountId&quot;:{&quot;url&quot;:&quot;https://github.com/fiepoul/chessenginejava.git&quot;,&quot;accountId&quot;:&quot;e43b2dee-dddc-4305-b716-eb3b9bea4dd9&quot;}}</component>
+  <component name="GitHubPullRequestSearchHistory">
+    {
+    &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;jala0001&quot;
+    }
+    }
+  </component>
+  <component name="GithubPullRequestsUISettings">
+    {
+    &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/jala0001/chessEngine.git&quot;,
+    &quot;accountId&quot;: &quot;e43b2dee-dddc-4305-b716-eb3b9bea4dd9&quot;
+    }
+    }
+  </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
-  <component name="ProjectColorInfo">{&quot;associatedIndex&quot;:2}</component>
-=======
-  <component name="GitHubPullRequestSearchHistory">{
-  &quot;lastFilter&quot;: {
-    &quot;state&quot;: &quot;OPEN&quot;,
-    &quot;assignee&quot;: &quot;jala0001&quot;
-  }
-}</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/jala0001/chessEngine.git&quot;,
-    &quot;accountId&quot;: &quot;e43b2dee-dddc-4305-b716-eb3b9bea4dd9&quot;
-  }
-}</component>
-  <component name="ProjectColorInfo">{
-  &quot;associatedIndex&quot;: 2
-}</component>
->>>>>>> 735bff9764535fc432981d703a985736bf321b08
+  <component name="ProjectColorInfo">
+    {
+    &quot;associatedIndex&quot;: 2
+    }
+  </component>
   <component name="ProjectId" id="2ul4vANKZgDK56afTPS5EcZm7t2" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
+  <component name="PropertiesComponent">
+    {
+    &quot;keyToString&quot;: {
     &quot;Application.Main.executor&quot;: &quot;Run&quot;,
     &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
@@ -86,8 +82,9 @@
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
-  }
-}</component>
+    }
+    }
+  </component>
   <component name="RecentsManager">
     <key name="MoveMembersDialog.RECENTS_KEY">
       <recent name="com.example.MoveGenerator" />
@@ -132,15 +129,11 @@
       <workItem from="1742810055615" duration="25168000" />
       <workItem from="1743848294571" duration="36455000" />
       <workItem from="1744290613171" duration="4680000" />
-<<<<<<< HEAD
-      <workItem from="1744747201687" duration="7683000" />
+      <workItem from="1744747201687" duration="7781000" />
       <workItem from="1744795902305" duration="7281000" />
       <workItem from="1745177740387" duration="304000" />
-      <workItem from="1746695446784" duration="118000" />
-=======
-      <workItem from="1744747201687" duration="7781000" />
       <workItem from="1745252072864" duration="2000" />
->>>>>>> 735bff9764535fc432981d703a985736bf321b08
+      <workItem from="1746695446784" duration="118000" />
     </task>
     <task id="LOCAL-00001" summary="created board with castle, en passant working and simple gui">
       <option name="closed" value="true" />

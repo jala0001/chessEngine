@@ -1,27 +1,46 @@
 package com.example;
 
+import javax.swing.*;
+
 public class Main {
 
     public static void main(String[] args) {
-        // Initialize the board from the standard starting position using FEN
+        // Vis fargevalg dialog
+        boolean playerIsWhite = ChessGUI.showColorSelectionDialog();
+        Game.setPlayerColor(playerIsWhite);
+
+        // Initialize the board
         Game.loadFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 
-        // Evaluér stillingen og skriv til konsollen
-         System.out.println("Evaluering af stilling: " + AI.evaluatePosition());
+        // Print initial evaluation
+        System.out.println("Evaluering af stilling: " + AI.evaluatePosition());
 
-        // Kør en alpha-beta evaluering på depth 3
-        int score = AI.alphaBeta(6, Integer.MIN_VALUE, Integer.MAX_VALUE, true);
-         System.out.println("Alpha-beta evaluering (depth 3): " + score);
-
-        // Display the initial board state in the console
+        // Display the initial board
         printBoard();
 
-        //Move aiBestMove = AI.findBestMove(3);
-        // System.out.println("Bedste træk for AI (hvid): " + aiBestMove);
+        // Launch the GUI
+        SwingUtilities.invokeLater(() -> {
+            ChessGUI gui = new ChessGUI();
 
+            // Hvis spilleren er sort, lad AI trække først
+            if (Game.aiPlaysFirst) {
+                makeAIMove(gui);
+            }
+        });
+    }
 
-        // Launch the graphical user interface
-        new ChessGUI();
+    // Hjælpemetode til at lave AI-træk
+    public static void makeAIMove(ChessGUI gui) {
+        // Tjek at det er AI's tur
+        if ((Game.isWhiteTurn && !Game.playerIsWhite) || (!Game.isWhiteTurn && Game.playerIsWhite)) {
+            Move aiMove = AI.findBestMove(4);
+            if (aiMove != null) {
+                System.out.println("🤖 AI trækker: " + aiMove);
+                Game.makeMove(aiMove);
+                //Game.changeTurn(); // Vi skal manuelt skifte tur her
+                gui.drawBoard();
+            }
+        }
     }
 
 
