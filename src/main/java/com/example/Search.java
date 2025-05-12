@@ -47,7 +47,12 @@ public class Search {
      * @param maximizingPlayer Om den aktuelle spiller maksimerer (hvid) eller minimerer (sort)
      * @return Evaluering af stillingen når den er "rolig"
      */
-    public static int quiescence(int alpha, int beta, boolean maximizingPlayer) {
+    public static int quiescence(int alpha, int beta, boolean maximizingPlayer, long startTime, long timeLimit) {
+        // Tidstjek i quiescence
+        if (System.currentTimeMillis() - startTime > timeLimit) {
+            return Evaluation.evaluatePosition();
+        }
+
         int standPat = Evaluation.evaluatePosition();
 
         if (maximizingPlayer) {
@@ -70,8 +75,13 @@ public class Search {
         });
 
         for (Move move : captures) {
+            // Tidstjek mellem captures
+            if (System.currentTimeMillis() - startTime > timeLimit) {
+                break;
+            }
+
             int captured = Game.makeMove(move);
-            int score = quiescence(alpha, beta, !maximizingPlayer);
+            int score = quiescence(alpha, beta, !maximizingPlayer, startTime, timeLimit);
             Game.undoMove(move, captured);
 
             if (maximizingPlayer) {
@@ -96,10 +106,15 @@ public class Search {
      * @param maximizingPlayer Om den aktuelle spiller maksimerer (hvid) eller minimerer (sort)
      * @return Bedste score for den aktuelle spiller
      */
-    public static int alphaBeta(int depth, int alpha, int beta, boolean maximizingPlayer) {
+    public static int alphaBeta(int depth, int alpha, int beta, boolean maximizingPlayer, long startTime, long timeLimit) {
+        // Tidstjek
+        if (System.currentTimeMillis() - startTime > timeLimit) {
+            return Evaluation.evaluatePosition();
+        }
+
         // Basetilfælde
         if (depth == 0) {
-            return quiescence(alpha, beta, maximizingPlayer);
+            return quiescence(alpha, beta, maximizingPlayer, startTime, timeLimit);
         }
 
         // Generer og sortér træk (move ordering)
@@ -109,9 +124,14 @@ public class Search {
         if (maximizingPlayer) {
             int maxEval = Integer.MIN_VALUE;
             for (Move move : moves) {
+                // Tidstjek mellem træk
+                if (System.currentTimeMillis() - startTime > timeLimit) {
+                    break;
+                }
+
                 int captured = Game.makeMove(move);
 
-                int eval = alphaBeta(depth - 1, alpha, beta, false);
+                int eval = alphaBeta(depth - 1, alpha, beta, false, startTime, timeLimit);
 
                 Game.undoMove(move, captured);
 
@@ -125,9 +145,14 @@ public class Search {
         } else {
             int minEval = Integer.MAX_VALUE;
             for (Move move : moves) {
+                // Tidstjek mellem træk
+                if (System.currentTimeMillis() - startTime > timeLimit) {
+                    break;
+                }
+
                 int captured = Game.makeMove(move);
 
-                int eval = alphaBeta(depth - 1, alpha, beta, true);
+                int eval = alphaBeta(depth - 1, alpha, beta, true, startTime, timeLimit);
 
                 Game.undoMove(move, captured);
 

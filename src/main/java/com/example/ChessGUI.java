@@ -91,7 +91,7 @@ public class ChessGUI extends JFrame {
             drawBoard();
 
             if (Game.isWhiteTurn != playerIsWhite) {
-                Move aiMove = AI.findBestMove(4);
+                Move aiMove = AI.findBestMove(6); // Øget dybde fra 4 til 6
                 if (aiMove != null) {
                     Game.makeMove(aiMove);
                     drawBoard();
@@ -107,7 +107,7 @@ public class ChessGUI extends JFrame {
             threatenedSquares.clear();
 
             if (Game.isWhiteTurn != playerIsWhite) {
-                Move aiMove = AI.findBestMove(4);
+                Move aiMove = AI.findBestMove(6); // Øget dybde fra 4 til 6
                 if (aiMove != null) {
                     Game.makeMove(aiMove);
                 }
@@ -228,7 +228,7 @@ public class ChessGUI extends JFrame {
                     checkEnd();
 
                     if (Game.isWhiteTurn != playerIsWhite) {
-                        Move aiMove = AI.findBestMove(4);
+                        Move aiMove = AI.findBestMove(6); // Øget dybde fra 4 til 6
                         if (aiMove != null) Game.makeMove(aiMove);
                         drawBoard();
                         checkEnd();

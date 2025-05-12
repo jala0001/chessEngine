@@ -30,7 +30,7 @@ public class Main {
     public static void makeAIMove(ChessGUI gui) {
         // Tjek at det er AI's tur
         if ((Game.isWhiteTurn && !Game.playerIsWhite) || (!Game.isWhiteTurn && Game.playerIsWhite)) {
-            Move aiMove = AI.findBestMove(4);
+            Move aiMove = AI.findBestMove(6); // Øget dybde fra 4 til 6
             if (aiMove != null) {
                 System.out.println("🤖 AI trækker: " + aiMove);
                 Game.makeMove(aiMove);

@@ -29,11 +29,21 @@ public class AI {
         Move bestMoveAtDepth = null;
         int bestScoreAtDepth = 0;
 
-        // Iterativ deepening
+        // Start tidsmåling (15 sekunder max)
+        long startTime = System.currentTimeMillis();
+        long timeLimit = 15000; // 15 sekunder i millisekunder
+
+        // Iterativ deepening med tidsbegrænsning
         for (int depth = 1; depth <= maxDepth; depth++) {
+            // Tjek om tid er løbet ud
+            if (System.currentTimeMillis() - startTime > timeLimit) {
+                System.out.println("\n⏰ Time limit reached! Stopping search at depth " + (depth - 1));
+                break;
+            }
+
             System.out.println("\n===== ITERATIVE DEEPENING - DEPTH " + depth + " =====");
 
-            bestMoveAtDepth = findBestMoveAtDepth(depth, legalMoves);
+            bestMoveAtDepth = findBestMoveAtDepth(depth, legalMoves, startTime, timeLimit);
 
             if (bestMoveAtDepth != null) {
                 bestMove = bestMoveAtDepth;
@@ -53,12 +63,21 @@ public class AI {
             if (bestMove != null) {
                 Search.reorderMovesBasedOnPreviousSearch(legalMoves, bestMove);
             }
+
+            // Ekstra tidstjek før næste iteration starter
+            if (System.currentTimeMillis() - startTime > timeLimit * 0.8) {
+                System.out.println("\n⏰ Approaching time limit, wrapping up search...");
+                break;
+            }
         }
+
+        long elapsedTime = System.currentTimeMillis() - startTime;
+        System.out.println("\n⏱️ Search completed in " + elapsedTime + "ms");
 
         return bestMove;
     }
 
-    private static Move findBestMoveAtDepth(int depth, List<Move> moves) {
+    private static Move findBestMoveAtDepth(int depth, List<Move> moves, long startTime, long timeLimit) {
         boolean isMaximizingRoot = Game.isWhiteTurn;
         Move bestMove = null;
         int bestScore = isMaximizingRoot ? Integer.MIN_VALUE : Integer.MAX_VALUE;
@@ -80,6 +99,12 @@ public class AI {
         }
 
         for (Move move : moves) {
+            // Tidstjek mellem træk
+            if (System.currentTimeMillis() - startTime > timeLimit) {
+                System.out.println("\n⏰ Time limit reached during move evaluation!");
+                break;
+            }
+
             int movedPiece = Game.board[move.from];
             int targetPiece = Game.board[move.to];
             int captureBonus = 0;
@@ -119,13 +144,15 @@ public class AI {
                         MoveGenerator.squareToCoord(move.to));
             }
 
-            // Evaluer position via alphaBeta
+            // Evaluer position via alphaBeta med tidsbegrænsning
             int captured = Game.makeMove(move);
             boolean nextIsMaximizing = !isMaximizingRoot;
             int score = Search.alphaBeta(depth - 1,
                     Integer.MIN_VALUE,
                     Integer.MAX_VALUE,
-                    nextIsMaximizing);
+                    nextIsMaximizing,
+                    startTime,
+                    timeLimit);
             Game.undoMove(move, captured);
 
             // **2) side** (+1=hvid, −1=sort)

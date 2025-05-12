@@ -5,14 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="05abe853-bca5-4c1a-b6c5-08cd798a7c55" name="Changes" comment="updated draw by stalemate logic + GUI lir">
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/Evaluation.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/Search.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/ThreatDetector.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/example/AI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/AI.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/example/ChessGUI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/ChessGUI.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/Game.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/Game.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/example/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/Search.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/Search.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -110,7 +107,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="jdk-21.0.2-openjdk-21.0.2-4caba194b151-322ed176" />
+        <option value="jdk-21.0.2-openjdk-21.0.2-4caba194b151-4f524021" />
       </set>
     </attachedChunks>
   </component>
@@ -130,7 +127,6 @@
       <workItem from="1745177740387" duration="304000" />
       <workItem from="1745252072864" duration="2000" />
       <workItem from="1746695446784" duration="118000" />
-      <workItem from="1747045627206" duration="2050000" />
     </task>
     <task id="LOCAL-00001" summary="created board with castle, en passant working and simple gui">
       <option name="closed" value="true" />
