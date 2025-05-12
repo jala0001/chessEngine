@@ -48,6 +48,225 @@ public class ThreatDetector {
     }
 
     /**
+     * Finder alle brikker der angriber et bestemt felt.
+     * Dette hjælper AI'en med at vurdere om den kan slå angribere frem for at flygte.
+     *
+     * @param square Feltet der blev angrebet
+     * @param byWhitePieces Om angriberne er hvide brikker
+     * @return Liste af felter med angribende brikker
+     */
+    public static List<Integer> findAttackers(int square, boolean byWhitePieces) {
+        List<Integer> attackers = new ArrayList<>();
+
+        // Tjek alle mulige angribere
+        for (int i = 0; i < 128; i++) {
+            if ((i & 0x88) != 0) continue; // Spring ugyldige felter over
+
+            int piece = Game.board[i];
+            if (piece == 0) continue; // Spring tomme felter over
+
+            // Tjek kun brikker af den angivne farve
+            boolean isPieceWhite = piece > 0;
+            if (isPieceWhite != byWhitePieces) continue;
+
+            // Tjek om denne brik kan angribe feltet
+            boolean canAttack = false;
+
+            switch (Math.abs(piece)) {
+                case MoveGenerator.PAWN:
+                    // Bønder angriber diagonalt fremad
+                    int dir = isPieceWhite ? 16 : -16; // Retning bønder bevæger sig
+                    if ((i & 7) != 0 && i + dir - 1 == square) canAttack = true; // Angreb venstre
+                    if ((i & 7) != 7 && i + dir + 1 == square) canAttack = true; // Angreb højre
+                    break;
+
+                case MoveGenerator.KNIGHT:
+                    // Springere bevæger sig i L-form
+                    for (int offset : MoveGenerator.knightOffsets) {
+                        if (i + offset == square) {
+                            canAttack = true;
+                            break;
+                        }
+                    }
+                    break;
+
+                case MoveGenerator.BISHOP:
+                    // Løbere bevæger sig diagonalt
+                    for (int offset : MoveGenerator.bishopDirections) {
+                        int sq = i;
+                        while (true) {
+                            sq += offset;
+                            if ((sq & 0x88) != 0) break; // Uden for brættet
+                            if (sq == square) {
+                                canAttack = true;
+                                break;
+                            }
+                            if (Game.board[sq] != 0) break; // Blokeret
+                        }
+                        if (canAttack) break;
+                    }
+                    break;
+
+                case MoveGenerator.ROOK:
+                    // Tårne bevæger sig horisontalt og vertikalt
+                    for (int offset : MoveGenerator.rookDirections) {
+                        int sq = i;
+                        while (true) {
+                            sq += offset;
+                            if ((sq & 0x88) != 0) break; // Uden for brættet
+                            if (sq == square) {
+                                canAttack = true;
+                                break;
+                            }
+                            if (Game.board[sq] != 0) break; // Blokeret
+                        }
+                        if (canAttack) break;
+                    }
+                    break;
+
+                case MoveGenerator.QUEEN:
+                    // Dronninger bevæger sig som løbere og tårne kombineret
+                    // Tjek løber-lignende træk
+                    for (int offset : MoveGenerator.bishopDirections) {
+                        int sq = i;
+                        while (true) {
+                            sq += offset;
+                            if ((sq & 0x88) != 0) break; // Uden for brættet
+                            if (sq == square) {
+                                canAttack = true;
+                                break;
+                            }
+                            if (Game.board[sq] != 0) break; // Blokeret
+                        }
+                        if (canAttack) break;
+                    }
+
+                    // Hvis ikke fundet, tjek tårn-lignende træk
+                    if (!canAttack) {
+                        for (int offset : MoveGenerator.rookDirections) {
+                            int sq = i;
+                            while (true) {
+                                sq += offset;
+                                if ((sq & 0x88) != 0) break; // Uden for brættet
+                                if (sq == square) {
+                                    canAttack = true;
+                                    break;
+                                }
+                                if (Game.board[sq] != 0) break; // Blokeret
+                            }
+                            if (canAttack) break;
+                        }
+                    }
+                    break;
+
+                case MoveGenerator.KING:
+                    // Konger bevæger sig ét felt i alle retninger
+                    for (int offset : Game.kingOffsets) {
+                        if (i + offset == square) {
+                            canAttack = true;
+                            break;
+                        }
+                    }
+                    break;
+            }
+
+            if (canAttack) {
+                attackers.add(i);
+            }
+        }
+
+        return attackers;
+    }
+
+    /**
+     * Tjekker om en truet brik kan beskyttes ved at slå angriberen.
+     * Dette hjælper AI'en med at vælge "slå angriberen" frem for "flygt med brikken".
+     *
+     * @param threatenedSquare Feltet med den truede brik
+     * @param attackerSquare Feltet med angriberen
+     * @return True hvis angriberen kan slås juridisk
+     */
+    public static boolean canCaptureAttacker(int threatenedSquare, int attackerSquare) {
+        boolean playerIsWhite = Game.board[threatenedSquare] > 0;
+        List<Move> legalMoves = Game.generateLegalMoves();
+
+        // Tjek om der er et juridisk træk der slår angriberen
+        for (Move move : legalMoves) {
+            if (move.to == attackerSquare) {
+                // Dette træk slår angriberen - tjek om det er sikkert
+                // (dvs. brikken der slår bliver ikke selv slået)
+                int movedPiece = Game.board[move.from];
+                boolean movedPieceIsWhite = movedPiece > 0;
+
+                if (movedPieceIsWhite == playerIsWhite) {
+                    // Dette er en af vores egne brikker
+                    System.out.println("   💡 " + Evaluation.getPieceName(movedPiece) + " at " +
+                            MoveGenerator.squareToCoord(move.from) + " can capture the attacker " +
+                            Evaluation.getPieceName(Game.board[attackerSquare]) + " at " +
+                            MoveGenerator.squareToCoord(attackerSquare));
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Forbedret version af findThreatenedPieces der også tjekker om angriberen kan slås.
+     * Returnerer kun brikker der er i ægte fare (ikke kan reddes ved at slå angriberen).
+     */
+    public static int[][] findThreatenedPiecesAdvanced() {
+        List<int[]> threatened = new ArrayList<>();
+
+        // Scan hele brættet for brikker tilhørende den aktuelle spiller
+        for (int i = 0; i < 128; i++) {
+            if ((i & 0x88) != 0) continue; // Spring ugyldige felter over
+
+            int piece = Game.board[i];
+            if (piece == 0) continue; // Spring tomme felter over
+
+            // Tjek kun brikker der tilhører den aktuelle spiller
+            boolean isWhitePiece = piece > 0;
+            if ((Game.isWhiteTurn && !isWhitePiece) || (!Game.isWhiteTurn && isWhitePiece)) {
+                continue;
+            }
+
+            // Tjek om denne brik er under angreb af modstanderen
+            boolean isAttacked = isSquareAttacked(i, !isWhitePiece);
+
+            if (isAttacked) {
+                // Find alle angribere af denne brik
+                List<Integer> attackers = findAttackers(i, !isWhitePiece);
+                boolean canDefendByCapture = false;
+
+                // Tjek om vi kan slå en af angriberne
+                for (int attackerSquare : attackers) {
+                    if (canCaptureAttacker(i, attackerSquare)) {
+                        canDefendByCapture = true;
+                        System.out.println("   ✅ " + Evaluation.getPieceName(piece) + " at " +
+                                MoveGenerator.squareToCoord(i) + " can be defended by capturing attacker!");
+                        break;
+                    }
+                }
+
+                // Hvis vi ikke kan forsvare ved at slå angriberen, er brikken i ægte fare
+                if (!canDefendByCapture) {
+                    int pieceValue = Math.abs(Evaluation.getPieceValue(piece));
+                    threatened.add(new int[]{i, pieceValue});
+                    System.out.println("⚠️ " + Evaluation.getPieceName(piece) + " at " +
+                            MoveGenerator.squareToCoord(i) + " is in real danger (cannot defend by capture)!");
+                }
+            }
+        }
+
+        // Konverter til array og sortér efter brikværdi (højeste først)
+        int[][] result = threatened.toArray(new int[0][0]);
+        Arrays.sort(result, (a, b) -> Integer.compare(b[1], a[1]));
+
+        return result;
+    }
+
+    /**
      * Kontrollerer om et felt er under angreb af brikker af en bestemt farve.
      * Bruges til at tjekke om en brik er i fare eller om et træk er sikkert.
      *

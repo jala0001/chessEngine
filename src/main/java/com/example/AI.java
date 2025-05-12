@@ -29,9 +29,30 @@ public class AI {
         Move bestMoveAtDepth = null;
         int bestScoreAtDepth = 0;
 
-        // Start tidsmåling (15 sekunder max)
+        // Start tidsmåling (5 sekunder max)
         long startTime = System.currentTimeMillis();
-        long timeLimit = 15000; // 15 sekunder i millisekunder
+        long timeLimit = 5000; // 5 sekunder i millisekunder
+
+        // *** KRITISK: TJEK FOR SKAKMAT FØRST ***
+        // Hvis vi kan give mat, gør det øjeblikkeligt
+        List<Move> mateMoves = MateDetector.findMateInOneMoves();
+        if (!mateMoves.isEmpty()) {
+            System.out.println("🏆🏆🏆 MATE IN 1 FOUND! Playing " + mateMoves.get(0));
+            return mateMoves.get(0);
+        }
+
+        // Hvis vi er truet af mat, find forsvar øjeblikkeligt
+        if (MateDetector.isMateInOne()) {
+            Move defense = MateDetector.findMateDefense();
+            if (defense != null) {
+                System.out.println("🛡️🛡️🛡️ DEFENDING AGAINST MATE with " + defense);
+                return defense;
+            } else {
+                System.out.println("💀💀💀 NO DEFENSE AGAINST MATE - choosing random move");
+                // Hvis ingen forsvar findes, spil det første lovlige træk
+                return legalMoves.isEmpty() ? null : legalMoves.get(0);
+            }
+        }
 
         // Iterativ deepening med tidsbegrænsning
         for (int depth = 1; depth <= maxDepth; depth++) {
@@ -85,10 +106,15 @@ public class AI {
         System.out.println("Current position evaluation before AI's move:");
         Evaluation.evaluatePosition(true);
 
-        // *** FIND TRUEDE BRIKKER ***
-        int[][] threatenedPieces = ThreatDetector.findThreatenedPieces();
+        // *** EVALUER MAT-TRUSLER ***
+        int mateScore = MateDetector.evaluateMateThreats();
+        System.out.println("💀 Mate threat evaluation: " + mateScore);
+
+        // *** FIND TRUEDE BRIKKER (FORBEDRET) ***
+        // Brug den avancerede metode der tjekker om angribere kan slås
+        int[][] threatenedPieces = ThreatDetector.findThreatenedPiecesAdvanced();
         if (threatenedPieces.length > 0) {
-            System.out.println("\n⚠️⚠️⚠️ ALERT: " + threatenedPieces.length + " pieces are under attack!");
+            System.out.println("\n⚠️⚠️⚠️ ALERT: " + threatenedPieces.length + " pieces are in REAL danger!");
             for (int[] piece : threatenedPieces) {
                 int square = piece[0];
                 int value = piece[1];
@@ -110,6 +136,15 @@ public class AI {
             int captureBonus = 0;
             int safetyPenalty = 0;
             int rescueBonus = 0;
+            int mateBonus = 0;
+
+            // *** TJEK OM DETTE TRÆK GIVER SKAKMAT ***
+            int captured = Game.makeMove(move);
+            if (Game.isCheckmate()) {
+                mateBonus = 1_000_000; // Maksimal bonus for mat
+                System.out.println("🏆 Move " + move + " gives CHECKMATE! Bonus: +" + mateBonus);
+            }
+            Game.undoMove(move, captured);
 
             // *** TJEK OM DETTE TRÆK REDDER EN TRUET BRIK ***
             boolean savesThreatenedPiece = false;
@@ -145,7 +180,7 @@ public class AI {
             }
 
             // Evaluer position via alphaBeta med tidsbegrænsning
-            int captured = Game.makeMove(move);
+            captured = Game.makeMove(move);
             boolean nextIsMaximizing = !isMaximizingRoot;
             int score = Search.alphaBeta(depth - 1,
                     Integer.MIN_VALUE,
@@ -158,7 +193,10 @@ public class AI {
             // **2) side** (+1=hvid, −1=sort)
             int side = (movedPiece > 0) ? +1 : -1;
 
-            // **1) rescue‐bonus**
+            // **1) mate-bonus** (HØJESTE PRIORITET)
+            score += side * mateBonus;
+
+            // **2) rescue‐bonus**
             score += side * rescueBonus;
 
             // **3) safety‐penalty** (trækker for hvid, tilføjer for sort)
@@ -195,7 +233,10 @@ public class AI {
             }
 
             // Formater og udskriv trækinformation
-            System.out.printf("Move: %-8s Base score: %-6d", move, score - captureBonus - rescueBonus);
+            System.out.printf("Move: %-8s Base score: %-6d", move, score - captureBonus - rescueBonus - mateBonus);
+            if (mateBonus > 0) {
+                System.out.printf(" CHECKMATE! (+%d)", mateBonus);
+            }
             if (targetPiece != 0) {
                 if (capturedPieceDefended) {
                     System.out.printf(" DEFENDED Capture: %-6s", Evaluation.getPieceName(targetPiece));
