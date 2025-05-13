@@ -2,21 +2,7 @@ package com.example;
 
 import java.util.List;
 
-/**
- * AI-klassen implementerer skak-motoren, som beregner og vælger træk.
- * Den indeholder evalueringsfunktioner, søgealgoritmer og sikkerhedskontroller.
- */
-
 public class AI {
-
-    // ===== PIECE-SQUARE TABLES =====
-    // Disse tabeller giver positionelle bonusser baseret på brikkernes placering på brættet
-
-    // ===== EVALUERINGS-METODER =====
-
-    // ===== TRUSSEL-DETEKTIONS METODER =====
-
-    // ===== SØGEALGORITMER =====
 
 
     public static Move findBestMove(int maxDepth) {

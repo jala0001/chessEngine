@@ -7,6 +7,22 @@ import java.util.List;
 import static com.example.MoveGenerator.slide;
 
 public class ThreatDetector {
+
+
+    private static List<Integer> getAttackersOfSquare(int square, boolean byWhitePieces) {
+        List<Integer> attackers = new ArrayList<>();
+        for (int i = 0; i < 128; i++) {
+            if ((i & 0x88) != 0) continue;
+            int piece = Game.board[i];
+            if (piece == 0 || (piece > 0) != byWhitePieces) continue;
+
+            if (MoveGenerator.canPieceReachSquare(i, square, Math.abs(piece), byWhitePieces, Game.board)) {
+                attackers.add(i);
+            }
+        }
+        return attackers;
+    }
+
     /**
      * Finder alle brikker tilhørende den aktuelle spiller, der er under angreb.
      * Returnerer en liste sorteret efter brikværdi (mest værdifulde først).
@@ -40,126 +56,20 @@ public class ThreatDetector {
      * Finder alle brikker der angriber et bestemt felt.
      * Dette hjælper AI'en med at vurdere om den kan slå angribere frem for at flygte.
      *
-     * @param square Feltet der blev angrebet
+     * @param square        Feltet der blev angrebet
      * @param byWhitePieces Om angriberne er hvide brikker
      * @return Liste af felter med angribende brikker
      */
     public static List<Integer> findAttackers(int square, boolean byWhitePieces) {
         List<Integer> attackers = new ArrayList<>();
 
-        // Tjek alle mulige angribere
         for (int i = 0; i < 128; i++) {
-            if ((i & 0x88) != 0) continue; // Spring ugyldige felter over
+            if ((i & 0x88) != 0) continue;
 
             int piece = Game.board[i];
-            if (piece == 0) continue; // Spring tomme felter over
+            if (piece == 0 || (piece > 0) != byWhitePieces) continue;
 
-            // Tjek kun brikker af den angivne farve
-            boolean isPieceWhite = piece > 0;
-            if (isPieceWhite != byWhitePieces) continue;
-
-            // Tjek om denne brik kan angribe feltet
-            boolean canAttack = false;
-
-            switch (Math.abs(piece)) {
-                case MoveGenerator.PAWN:
-                    // Bønder angriber diagonalt fremad
-                    int dir = isPieceWhite ? 16 : -16; // Retning bønder bevæger sig
-                    if ((i & 7) != 0 && i + dir - 1 == square) canAttack = true; // Angreb venstre
-                    if ((i & 7) != 7 && i + dir + 1 == square) canAttack = true; // Angreb højre
-                    break;
-
-                case MoveGenerator.KNIGHT:
-                    // Springere bevæger sig i L-form
-                    for (int offset : MoveGenerator.knightOffsets) {
-                        if (i + offset == square) {
-                            canAttack = true;
-                            break;
-                        }
-                    }
-                    break;
-
-                case MoveGenerator.BISHOP:
-                    // Løbere bevæger sig diagonalt
-                    for (int offset : MoveGenerator.bishopDirections) {
-                        int sq = i;
-                        while (true) {
-                            sq += offset;
-                            if ((sq & 0x88) != 0) break; // Uden for brættet
-                            if (sq == square) {
-                                canAttack = true;
-                                break;
-                            }
-                            if (Game.board[sq] != 0) break; // Blokeret
-                        }
-                        if (canAttack) break;
-                    }
-                    break;
-
-                case MoveGenerator.ROOK:
-                    // Tårne bevæger sig horisontalt og vertikalt
-                    for (int offset : MoveGenerator.rookDirections) {
-                        int sq = i;
-                        while (true) {
-                            sq += offset;
-                            if ((sq & 0x88) != 0) break; // Uden for brættet
-                            if (sq == square) {
-                                canAttack = true;
-                                break;
-                            }
-                            if (Game.board[sq] != 0) break; // Blokeret
-                        }
-                        if (canAttack) break;
-                    }
-                    break;
-
-                case MoveGenerator.QUEEN:
-                    // Dronninger bevæger sig som løbere og tårne kombineret
-                    // Tjek løber-lignende træk
-                    for (int offset : MoveGenerator.bishopDirections) {
-                        int sq = i;
-                        while (true) {
-                            sq += offset;
-                            if ((sq & 0x88) != 0) break; // Uden for brættet
-                            if (sq == square) {
-                                canAttack = true;
-                                break;
-                            }
-                            if (Game.board[sq] != 0) break; // Blokeret
-                        }
-                        if (canAttack) break;
-                    }
-
-                    // Hvis ikke fundet, tjek tårn-lignende træk
-                    if (!canAttack) {
-                        for (int offset : MoveGenerator.rookDirections) {
-                            int sq = i;
-                            while (true) {
-                                sq += offset;
-                                if ((sq & 0x88) != 0) break; // Uden for brættet
-                                if (sq == square) {
-                                    canAttack = true;
-                                    break;
-                                }
-                                if (Game.board[sq] != 0) break; // Blokeret
-                            }
-                            if (canAttack) break;
-                        }
-                    }
-                    break;
-
-                case MoveGenerator.KING:
-                    // Konger bevæger sig ét felt i alle retninger
-                    for (int offset : Game.kingOffsets) {
-                        if (i + offset == square) {
-                            canAttack = true;
-                            break;
-                        }
-                    }
-                    break;
-            }
-
-            if (canAttack) {
+            if (canPieceAttackSquare(i, piece, square)) {
                 attackers.add(i);
             }
         }
@@ -167,12 +77,13 @@ public class ThreatDetector {
         return attackers;
     }
 
+
     /**
      * Tjekker om en truet brik kan beskyttes ved at slå angriberen.
      * Dette hjælper AI'en med at vælge "slå angriberen" frem for "flygt med brikken".
      *
      * @param threatenedSquare Feltet med den truede brik
-     * @param attackerSquare Feltet med angriberen
+     * @param attackerSquare   Feltet med angriberen
      * @return True hvis angriberen kan slås juridisk
      */
     public static boolean canCaptureAttacker(int threatenedSquare, int attackerSquare) {
@@ -270,26 +181,13 @@ public class ThreatDetector {
             int piece = Game.board[from];
             if (piece == 0 || (piece > 0) != byWhitePieces) continue;
 
-            int absPiece = Math.abs(piece);
-
-            // Brug central metode for alle brikker undtagen bønder
-            if (absPiece != MoveGenerator.PAWN) {
-                if (MoveGenerator.canPieceReachSquare(from, square, absPiece, byWhitePieces, Game.board)) {
-                    return true;
-                }
-            } else {
-                // Specialhåndtering for bondeangreb (de angriber ikke i samme retning som de går)
-                int dir = byWhitePieces ? 16 : -16;
-                if ((from & 7) != 0 && from + dir - 1 == square) return true; // venstre diagonal
-                if ((from & 7) != 7 && from + dir + 1 == square) return true; // højre diagonal
+            if (canPieceAttackSquare(from, piece, square)) {
+                return true;
             }
         }
         return false;
     }
 
-    private static boolean canReachSquare(int from, int to, int pieceType, boolean isWhite) {
-        return MoveGenerator.canPieceReachSquare(from, to, pieceType, isWhite, Game.board);
-    }
 
 
     /**
@@ -421,256 +319,16 @@ public class ThreatDetector {
         return isUnderAttack;
     }
 
-    /**
-     * Kontrollerer om et felt er sikkert at flytte til.
-     * En alternativ implementering af angrebs-detektion, bruges som backup.
-     *
-     * @param square Feltet der skal tjekkes
-     * @param isWhitePiece Om brikken der skal flyttes er hvid
-     * @return True hvis feltet er sikkert
-     */
-    private static boolean isSquareSafeToMoveTo(int square, boolean isWhitePiece) {
-        boolean isUnderAttack = Game.isSquareAttacked(square, isWhitePiece);
+    private static boolean canPieceAttackSquare(int from, int piece, int target) {
+        int abs = Math.abs(piece);
+        boolean isWhite = piece > 0;
 
-        if (isUnderAttack) {
-            // Tjek bondeangreb specifikt
-            int pawnDirection = isWhitePiece ? 16 : -16; // Retning bønder bevæger sig
-            int[] pawnAttackOffsets = {pawnDirection - 1, pawnDirection + 1}; // Diagonale slag
-
-            for (int offset : pawnAttackOffsets) {
-                int attackerSquare = square - offset; // Omvendt retning for at finde angriber
-                if ((attackerSquare & 0x88) != 0) continue; // Spring ugyldige felter over
-
-                int piece = Game.board[attackerSquare];
-                if ((isWhitePiece && piece == -MoveGenerator.PAWN) ||
-                        (!isWhitePiece && piece == MoveGenerator.PAWN)) {
-                    System.out.println("   ⚠️ Square " + MoveGenerator.squareToCoord(square) +
-                            " is defended by pawn at " + MoveGenerator.squareToCoord(attackerSquare));
-                }
-            }
-
-            // Tjek andre brikkers angreb
-            for (int i = 0; i < 128; i++) {
-                if ((i & 0x88) != 0) continue; // Spring ugyldige felter over
-
-                int piece = Game.board[i];
-                if (piece == 0) continue; // Spring tomme felter over
-
-                // Tjek kun modstanderbrikker
-                if ((isWhitePiece && piece > 0) || (!isWhitePiece && piece < 0)) continue;
-
-                // Tjek om denne brik kan angribe feltet
-                boolean canAttack = false;
-
-                switch (Math.abs(piece)) {
-                    case MoveGenerator.PAWN:
-                        // Allerede tjekket bønder ovenfor
-                        break;
-
-                    case MoveGenerator.KNIGHT:
-                        for (int offset : MoveGenerator.knightOffsets) {
-                            if (i + offset == square) {
-                                canAttack = true;
-                                break;
-                            }
-                        }
-                        break;
-
-                    case MoveGenerator.BISHOP:
-                    case MoveGenerator.QUEEN:
-                        // Tjek diagonale angreb
-                        for (int dir : MoveGenerator.bishopDirections) {
-                            int sq = i;
-                            while (true) {
-                                sq += dir;
-                                if ((sq & 0x88) != 0) break; // Uden for brættet
-                                if (sq == square) {
-                                    canAttack = true;
-                                    break;
-                                }
-                                if (Game.board[sq] != 0) break; // Blokeret
-                            }
-                            if (canAttack) break;
-                        }
-                        if (Math.abs(piece) == MoveGenerator.BISHOP) break;
-                        // Fortsæt for dronning til også at tjekke tårn-retninger
-
-                    case MoveGenerator.ROOK:
-                        // Tjek horisontale/vertikale angreb
-                        for (int dir : MoveGenerator.rookDirections) {
-                            int sq = i;
-                            while (true) {
-                                sq += dir;
-                                if ((sq & 0x88) != 0) break; // Uden for brættet
-                                if (sq == square) {
-                                    canAttack = true;
-                                    break;
-                                }
-                                if (Game.board[sq] != 0) break; // Blokeret
-                            }
-                            if (canAttack) break;
-                        }
-                        break;
-
-                    case MoveGenerator.KING:
-                        for (int offset : Game.kingOffsets) {
-                            if (i + offset == square) {
-                                canAttack = true;
-                                break;
-                            }
-                        }
-                        break;
-                }
-
-                if (canAttack) {
-                    System.out.println("   ⚠️ Square " + MoveGenerator.squareToCoord(square) +
-                            " is defended by " + Evaluation.getPieceName(piece) + " at " +
-                            MoveGenerator.squareToCoord(i));
-                }
-            }
+        if (abs == MoveGenerator.PAWN) {
+            int dir = isWhite ? 16 : -16;
+            return ((from & 7) != 0 && from + dir - 1 == target) ||
+                    ((from & 7) != 7 && from + dir + 1 == target);
         }
 
-        return !isUnderAttack;
-    }
-
-    /**
-     * Grundigt tjekker om et destinationsfelt er sikkert fra angreb
-     * ved at undersøge alle potentielle angribere på brættet.
-     *
-     * @param destination Destinationsfeltet
-     * @param forWhitePiece Om brikken der flytter er hvid
-     * @return True hvis feltet er sikkert
-     */
-    private static boolean isDestinationSafe(int destination, boolean forWhitePiece) {
-        boolean squareIsSafe = true;
-        StringBuilder attackers = new StringBuilder();
-
-        // Undersøg hvert felt på brættet for potentielle angribere
-        for (int i = 0; i < 128; i++) {
-            if ((i & 0x88) != 0) continue; // Spring ugyldige felter over
-
-            int piece = Game.board[i];
-            if (piece == 0) continue; // Spring tomme felter over
-
-            // Tjek kun modstanderbrikker
-            boolean isPieceWhite = piece > 0;
-            if ((forWhitePiece && isPieceWhite) || (!forWhitePiece && !isPieceWhite)) {
-                continue;
-            }
-
-            // Tjek om denne brik kan angribe destinationen
-            boolean canAttack = false;
-
-            switch (Math.abs(piece)) {
-                case MoveGenerator.PAWN:
-                    // Bønder angriber diagonalt fremad
-                    int dir = isPieceWhite ? 16 : -16; // Retning bønder bevæger sig
-                    if ((i & 7) != 0 && i + dir - 1 == destination) canAttack = true; // Angreb venstre
-                    if ((i & 7) != 7 && i + dir + 1 == destination) canAttack = true; // Angreb højre
-                    break;
-
-                case MoveGenerator.KNIGHT:
-                    // Springere bevæger sig i L-form
-                    for (int offset : MoveGenerator.knightOffsets) {
-                        if (i + offset == destination) {
-                            canAttack = true;
-                            break;
-                        }
-                    }
-                    break;
-
-                case MoveGenerator.BISHOP:
-                    // Løbere bevæger sig diagonalt
-                    for (int offset : MoveGenerator.bishopDirections) {
-                        int sq = i;
-                        while (true) {
-                            sq += offset;
-                            if ((sq & 0x88) != 0) break; // Uden for brættet
-                            if (sq == destination) {
-                                canAttack = true;
-                                break;
-                            }
-                            if (Game.board[sq] != 0) break; // Blokeret
-                        }
-                        if (canAttack) break;
-                    }
-                    break;
-
-                case MoveGenerator.ROOK:
-                    // Tårne bevæger sig horisontalt og vertikalt
-                    for (int offset : MoveGenerator.rookDirections) {
-                        int sq = i;
-                        while (true) {
-                            sq += offset;
-                            if ((sq & 0x88) != 0) break; // Uden for brættet
-                            if (sq == destination) {
-                                canAttack = true;
-                                break;
-                            }
-                            if (Game.board[sq] != 0) break; // Blokeret
-                        }
-                        if (canAttack) break;
-                    }
-                    break;
-
-                case MoveGenerator.QUEEN:
-                    // Dronninger bevæger sig som løbere og tårne kombineret
-                    // Tjek løber-lignende træk
-                    for (int offset : MoveGenerator.bishopDirections) {
-                        int sq = i;
-                        while (true) {
-                            sq += offset;
-                            if ((sq & 0x88) != 0) break; // Uden for brættet
-                            if (sq == destination) {
-                                canAttack = true;
-                                break;
-                            }
-                            if (Game.board[sq] != 0) break; // Blokeret
-                        }
-                        if (canAttack) break;
-                    }
-
-                    // Hvis ikke fundet, tjek tårn-lignende træk
-                    if (!canAttack) {
-                        for (int offset : MoveGenerator.rookDirections) {
-                            int sq = i;
-                            while (true) {
-                                sq += offset;
-                                if ((sq & 0x88) != 0) break; // Uden for brættet
-                                if (sq == destination) {
-                                    canAttack = true;
-                                    break;
-                                }
-                                if (Game.board[sq] != 0) break; // Blokeret
-                            }
-                            if (canAttack) break;
-                        }
-                    }
-                    break;
-
-                case MoveGenerator.KING:
-                    // Konger bevæger sig ét felt i alle retninger
-                    for (int offset : Game.kingOffsets) {
-                        if (i + offset == destination) {
-                            canAttack = true;
-                            break;
-                        }
-                    }
-                    break;
-            }
-
-            if (canAttack) {
-                if (attackers.length() > 0) attackers.append(", ");
-                attackers.append(Evaluation.getPieceName(piece)).append(" at ").append(MoveGenerator.squareToCoord(i));
-                squareIsSafe = false;
-            }
-        }
-
-        if (!squareIsSafe) {
-            System.out.println("   ⚠️ Square " + MoveGenerator.squareToCoord(destination) +
-                    " is attacked by: " + attackers);
-        }
-
-        return squareIsSafe;
+        return MoveGenerator.canPieceReachSquare(from, target, abs, isWhite, Game.board);
     }
 }

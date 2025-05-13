@@ -139,7 +139,20 @@ public class Evaluation {
 
         }
 
-        int totalScore = materialScore + positionScore + safetyScore + mateScore;
+        int mobilityScore = 0;
+
+        // Modstanderens mobilitet
+        Game.isWhiteTurn = !Game.isWhiteTurn;
+        int opponentMoves = Game.generateLegalMoves().size();
+        mobilityScore -= opponentMoves * 2;
+        Game.isWhiteTurn = !Game.isWhiteTurn;
+
+        // Egen mobilitet
+        int ownMoves = Game.generateLegalMoves().size();
+        mobilityScore += ownMoves * 2;
+
+        // Beregn total
+        int totalScore = materialScore + positionScore + safetyScore + mateScore + mobilityScore;
 
         if (verbose) {
             System.out.println("Position Evaluation:");
