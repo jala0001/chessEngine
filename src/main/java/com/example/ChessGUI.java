@@ -16,6 +16,7 @@ public class ChessGUI extends JFrame {
     JLabel titleLabel = new JLabel(" SKAK // BOT", SwingConstants.CENTER);
 
     int selectedSquare = -1;
+    int lastMoveTo = -1;
     boolean playerIsWhite = true;
     boolean flippedBoard = false;
     boolean darkTheme = false;
@@ -87,13 +88,15 @@ public class ChessGUI extends JFrame {
         buttonPanel.add(makeButton("Start forfra", () -> {
             Game.reset();
             selectedSquare = -1;
+            lastMoveTo = -1;
             threatenedSquares.clear();
             drawBoard();
 
             if (Game.isWhiteTurn != playerIsWhite) {
-                Move aiMove = AI.findBestMove(6); // Øget dybde fra 4 til 6
+                Move aiMove = AI.findBestMove(6);
                 if (aiMove != null) {
                     Game.makeMove(aiMove);
+                    lastMoveTo = aiMove.to;
                     drawBoard();
                 }
             }
@@ -104,12 +107,14 @@ public class ChessGUI extends JFrame {
             flippedBoard = !flippedBoard;
             Game.reset();
             selectedSquare = -1;
+            lastMoveTo = -1;
             threatenedSquares.clear();
 
             if (Game.isWhiteTurn != playerIsWhite) {
-                Move aiMove = AI.findBestMove(6); // Øget dybde fra 4 til 6
+                Move aiMove = AI.findBestMove(6);
                 if (aiMove != null) {
                     Game.makeMove(aiMove);
+                    lastMoveTo = aiMove.to;
                 }
             }
             drawBoard();
@@ -143,6 +148,7 @@ public class ChessGUI extends JFrame {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 btn.setBackground(btn.getBackground().brighter());
             }
+
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 btn.setBackground(buttonColor);
             }
@@ -174,9 +180,12 @@ public class ChessGUI extends JFrame {
                 tile.setForeground(piece > 0 ? Color.WHITE : (piece < 0 ? Color.BLACK : Color.GRAY));
 
                 Color baseColor = ((rank + file) % 2 == 0) ? darkSquare : lightSquare;
+
                 if (square == selectedSquare) {
                     tile.setBackground(selectedColor);
                     tile.setBorder(new LineBorder(Color.YELLOW, 3));
+                } else if (square == lastMoveTo) {
+                    tile.setBackground(new Color(200, 200, 200, 150));
                 } else if (threatenedSquares.contains(square)) {
                     tile.setBackground(threatColor);
                 } else {
@@ -190,9 +199,12 @@ public class ChessGUI extends JFrame {
                     public void mouseEntered(java.awt.event.MouseEvent evt) {
                         tile.setBackground(tile.getBackground().brighter());
                     }
+
                     public void mouseExited(java.awt.event.MouseEvent evt) {
                         if (clicked == selectedSquare) {
                             tile.setBackground(selectedColor);
+                        } else if (clicked == lastMoveTo) {
+                            tile.setBackground(new Color(200, 200, 200, 150));
                         } else if (threatenedSquares.contains(clicked)) {
                             tile.setBackground(threatColor);
                         } else {
@@ -222,16 +234,32 @@ public class ChessGUI extends JFrame {
             for (Move move : legalMoves) {
                 if (move.from == selectedSquare && move.to == square) {
                     Game.makeMove(move);
+                    handlePromotionIfNeeded(move);
+                    lastMoveTo = move.to;
                     selectedSquare = -1;
                     threatenedSquares.clear();
                     drawBoard();
                     checkEnd();
 
                     if (Game.isWhiteTurn != playerIsWhite) {
-                        Move aiMove = AI.findBestMove(6); // Øget dybde fra 4 til 6
-                        if (aiMove != null) Game.makeMove(aiMove);
-                        drawBoard();
-                        checkEnd();
+                        new Thread(() -> {
+                            try {
+                                Thread.sleep(100); // kort forsinkelse for visning
+                            } catch (InterruptedException ignored) {
+                            }
+
+                            Move aiMove = AI.findBestMove(6);
+                            if (aiMove != null) {
+                                Game.makeMove(aiMove);
+                                handlePromotionIfNeeded(aiMove);
+                                lastMoveTo = aiMove.to;
+
+                                SwingUtilities.invokeLater(() -> {
+                                    drawBoard();
+                                    checkEnd();
+                                });
+                            }
+                        }).start();
                     }
                     return;
                 }
@@ -241,6 +269,29 @@ public class ChessGUI extends JFrame {
         }
 
         drawBoard();
+    }
+
+    void handlePromotionIfNeeded(Move move) {
+        if (move.promotionPiece != 0) return;
+
+        int piece = Game.board[move.to];
+        boolean isPawn = Math.abs(piece) == MoveGenerator.PAWN;
+        int rank = move.to / 16;
+
+        if (isPawn && (rank == 0 || rank == 7)) {
+            String[] options = {"Dronning", "Tårn", "Løber", "Springer"};
+            int choice = JOptionPane.showOptionDialog(this, "Vælg forfremmelse:", "Bondeforfremmelse",
+                    JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
+
+            int newPiece = switch (choice) {
+                case 1 -> MoveGenerator.ROOK;
+                case 2 -> MoveGenerator.BISHOP;
+                case 3 -> MoveGenerator.KNIGHT;
+                default -> MoveGenerator.QUEEN;
+            };
+
+            Game.board[move.to] = (piece > 0 ? newPiece : -newPiece);
+        }
     }
 
     void checkEnd() {
