@@ -5,17 +5,51 @@ import java.util.List;
 
 public class MoveGenerator {
     // Piece constants
-    static final int PAWN = 1;
-    static final int KNIGHT = 2;
-    static final int BISHOP = 3;
-    static final int ROOK = 4;
-    static final int QUEEN = 5;
-    static final int KING = 6;
+    public static final int PAWN = 1;
+    public static final int KNIGHT = 2;
+    public static final int BISHOP = 3;
+    public static final int ROOK = 4;
+    public static final int QUEEN = 5;
+    public static final int KING = 6;
 
     // Direction offsets for movement
-    static final int[] knightOffsets = { -33, -31, -18, -14, 14, 18, 31, 33 };
-    static final int[] rookDirections = { -16, 16, -1, 1 };
-    static final int[] bishopDirections = { -17, -15, 15, 17 };
+    public static final int[] knightOffsets = { -33, -31, -18, -14, 14, 18, 31, 33 };
+    public static final int[] rookDirections = { -16, 16, -1, 1 };
+    public static final int[] bishopDirections = { -17, -15, 15, 17 };
+
+    public static boolean canPieceReachSquare(int from, int to, int pieceType, boolean isWhite, int[] board) {
+        return switch (pieceType) {
+            case KNIGHT -> {
+                for (int offset : knightOffsets) {
+                    if (from + offset == to) yield true;
+                }
+                yield false;
+            }
+
+            case BISHOP -> canReachBySliding(from, to, bishopDirections, board);
+
+            case ROOK -> canReachBySliding(from, to, rookDirections, board);
+
+            case QUEEN -> canReachBySliding(from, to, bishopDirections, board) ||
+                    canReachBySliding(from, to, rookDirections, board);
+
+            case KING -> {
+                for (int offset : Game.kingOffsets) {
+                    if (from + offset == to) yield true;
+                }
+                yield false;
+            }
+
+            case PAWN -> {
+                int dir = isWhite ? 16 : -16;
+                yield ((from & 7) != 0 && from + dir - 1 == to) ||
+                        ((from & 7) != 7 && from + dir + 1 == to);
+            }
+
+            default -> false;
+        };
+    }
+
 
     static boolean isOnBoard(int square) {
         return (square & 0x88) == 0;
@@ -30,7 +64,7 @@ public class MoveGenerator {
     }
 
     // Generate knight moves (L-shaped in 8 directions)
-    static void generateKnightMoves(int from, List<Move> moves, boolean whiteToMove) {
+    public static void generateKnightMoves(int from, List<Move> moves, boolean whiteToMove) {
         for (int offset : knightOffsets) {
             int to = from + offset;
             if (!isOnBoard(to)) continue;
@@ -43,41 +77,60 @@ public class MoveGenerator {
     }
 
     // Generate moves for sliding pieces (rooks, bishops, queens)
-    static void generateSlidingMoves(int from, List<Move> moves, boolean whiteToMove, int[] directions) {
-        for (int direction : directions) {
-            int to = from;
-            while (true) {
-                to += direction;
-                if (!isOnBoard(to)) break;
+    public static void generateSlidingMoves(int from, List<Move> moves, boolean whiteToMove, int[] directions) {
+        slide(from, directions, (f, t, target) -> {
+            if (target == 0) {
+                moves.add(new Move(f, t));
+                return true; // fortsæt videre i denne retning
+            } else if (isOpponentPiece(target, whiteToMove)) {
+                moves.add(new Move(f, t));
+            }
+            return false; // stop hvis modstander eller blokering
+        }, Game.board);
+    }
 
-                int target = Game.board[to];
-                if (target == 0) {
-                    moves.add(new Move(from, to));
-                } else {
-                    if (isOpponentPiece(target, whiteToMove)) {
-                        moves.add(new Move(from, to));
-                    }
-                    break;
-                }
+    public static void slide(int from, int[] directions, SlidingHandler handler, int[] board) {
+        for (int dir : directions) {
+            int sq = from;
+            while (true) {
+                sq += dir;
+                if ((sq & 0x88) != 0) break;
+
+                int target = board[sq];
+                boolean cont = handler.handle(from, sq, target);
+                if (!cont || target != 0) break;
             }
         }
     }
 
-    static void generateRookMoves(int from, List<Move> moves, boolean whiteToMove) {
+    public static boolean canReachBySliding(int from, int to, int[] directions, int[] board) {
+        final boolean[] found = {false};
+        slide(from, directions, (f, t, piece) -> {
+            if (t == to) {
+                found[0] = true;
+                return false;
+            }
+            return true;
+        }, board);
+        return found[0];
+    }
+
+
+    public static void generateRookMoves(int from, List<Move> moves, boolean whiteToMove) {
         generateSlidingMoves(from, moves, whiteToMove, rookDirections);
     }
 
-    static void generateBishopMoves(int from, List<Move> moves, boolean whiteToMove) {
+    public static void generateBishopMoves(int from, List<Move> moves, boolean whiteToMove) {
         generateSlidingMoves(from, moves, whiteToMove, bishopDirections);
     }
 
-    static void generateQueenMoves(int from, List<Move> moves, boolean whiteToMove) {
+    public static void generateQueenMoves(int from, List<Move> moves, boolean whiteToMove) {
         generateSlidingMoves(from, moves, whiteToMove, rookDirections);
         generateSlidingMoves(from, moves, whiteToMove, bishopDirections);
     }
 
     // Helper for adding castling moves if conditions are met
-    static void tryAddCastleMove(List<Move> moves, int from, int to, boolean white, boolean kingside) {
+    public static void tryAddCastleMove(List<Move> moves, int from, int to, boolean white, boolean kingside) {
         int[] path = white ? (kingside ? new int[]{5, 6} : new int[]{1, 2, 3})
                 : (kingside ? new int[]{117, 118} : new int[]{113, 114, 115});
         int rookSquare = white ? (kingside ? 7 : 0) : (kingside ? 119 : 112);
@@ -97,7 +150,22 @@ public class MoveGenerator {
     }
 
     // Generate king moves including castling
-    static void generateKingMoves(int from, List<Move> moves, boolean whiteToMove, boolean forCheckOnly) {
+    public static void generateKingMoves(int from, List<Move> moves, boolean whiteToMove, boolean forCheckOnly) {
+        // --- NYT: kan ikke rokere hvis man allerede er i skak ---
+        if (!forCheckOnly && Game.isCurrentPlayerInCheck()) {
+            // Vi genererer stadig de “almindelige” ét-felt-king-træk længere nede,
+            // men ingen rokade-træk
+            for (int offset : Game.kingOffsets) {
+                int to = from + offset;
+                if (!isOnBoard(to)) continue;
+                int target = Game.board[to];
+                if (isFriendlyPiece(target, whiteToMove)) continue;
+                moves.add(new Move(from, to));
+            }
+            return;
+        }
+
+        // --- Eksisterende: ét-felt-king-træk fortsætter som normalt ---
         for (int offset : Game.kingOffsets) {
             int to = from + offset;
             if (!isOnBoard(to)) continue;
@@ -110,18 +178,20 @@ public class MoveGenerator {
 
         if (forCheckOnly) return;
 
+        // --- Eksisterende rokade-logik, inklusive hasMoved-flag og path-checks ---
         if (whiteToMove && !Game.whiteKingMoved) {
-            if (!Game.whiteKingsideRookMoved) tryAddCastleMove(moves, from, 6, true, true);
-            if (!Game.whiteQueensideRookMoved) tryAddCastleMove(moves, from, 2, true, false);
+            if (!Game.whiteKingsideRookMoved)   tryAddCastleMove(moves, from,  6, true,  true);
+            if (!Game.whiteQueensideRookMoved)  tryAddCastleMove(moves, from,  2, true,  false);
         }
         if (!whiteToMove && !Game.blackKingMoved) {
-            if (!Game.blackKingsideRookMoved) tryAddCastleMove(moves, from, 118, false, true);
-            if (!Game.blackQueensideRookMoved) tryAddCastleMove(moves, from, 114, false, false);
+            if (!Game.blackKingsideRookMoved)   tryAddCastleMove(moves, from, 118, false, true);
+            if (!Game.blackQueensideRookMoved)  tryAddCastleMove(moves, from, 114, false, false);
         }
     }
 
+
     // Generate pawn moves (forward, captures, double move, en passant)
-    static void generatePawnMoves(int from, List<Move> moves, boolean whiteToMove, boolean forCheckOnly) {
+    public static void generatePawnMoves(int from, List<Move> moves, boolean whiteToMove, boolean forCheckOnly) {
         int direction = whiteToMove ? 16 : -16;
         int startRank = whiteToMove ? 1 : 6;
         int epRank = whiteToMove ? 4 : 3;
@@ -196,7 +266,7 @@ public class MoveGenerator {
     }
 
     // Generate all moves for current side
-    static List<Move> generateAllMoves(boolean whiteToMove, boolean forCheckOnly) {
+    public static List<Move> generateAllMoves(boolean whiteToMove, boolean forCheckOnly) {
         List<Move> moves = new ArrayList<>();
 
         for (int i = 0; i < 128; i++) {

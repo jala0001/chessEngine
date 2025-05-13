@@ -1,5 +1,6 @@
 package com.example;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Search {
@@ -26,17 +27,14 @@ public class Search {
         int fromPiece = Game.board[move.from];
         int toPiece = Game.board[move.to];
 
-        // Hvis det er et capture
         if (toPiece != 0) {
-            int captureGain = Math.abs(Evaluation.getPieceValue(toPiece)) - Math.abs(Evaluation.getPieceValue(fromPiece));
-            // Giv en "basis" på 1000 for at prioritere captures,
-            // plus en differensafhængig bonus.
-            return 1000 + captureGain;
+            int see = Evaluation.staticExchangeEval(move.to, move.from);
+            return 1000 + see; // prioriter stærke captures
         }
 
-        // Alm. ikke-capture
-        return 0;
+        return 0; // Ikke-capture
     }
+
 
     /**
      * Quiescence-søgning forhindrer horisonteffekten ved at fortsætte søgningen
@@ -63,10 +61,12 @@ public class Search {
             if (beta > standPat) beta = standPat;
         }
 
-        List<Move> captures = Game.generateLegalMoves();
+        List<Move> allMoves = Game.generateLegalMoves();
+        List<Move> captures = new ArrayList<>();
+        for (Move m : allMoves) {
+            if (Game.board[m.to] != 0) captures.add(m);
+        }
 
-        // 🎯 Filtrér kun captures og sorter dem efter værdi (MVV-LVA)
-        captures.removeIf(m -> Game.board[m.to] == 0);
 
         captures.sort((a, b) -> {
             int aValue = Math.abs(Evaluation.getPieceValue(Game.board[a.to])) - Math.abs(Evaluation.getPieceValue(Game.board[a.from]));
@@ -79,6 +79,9 @@ public class Search {
             if (System.currentTimeMillis() - startTime > timeLimit) {
                 break;
             }
+
+            int see = Evaluation.staticExchangeEval(move.to, move.from);
+            if (see < 0) continue; // Skip "bad" captures
 
             int captured = Game.makeMove(move);
             int score = quiescence(alpha, beta, !maximizingPlayer, startTime, timeLimit);

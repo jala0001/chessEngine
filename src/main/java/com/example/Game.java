@@ -69,34 +69,47 @@ public class Game {
         List<Move> pseudoMoves = MoveGenerator.generateAllMoves(whiteToMove, false);
 
         for (Move move : pseudoMoves) {
-            Move testMove = new Move(move);
-            int originalEnPassant = enPassantSquare;
+            int piece = board[move.from];
+            boolean isPawn = Math.abs(piece) == MoveGenerator.PAWN;
+            int toRank = move.to / 16;
 
-            int captured = makeMove(testMove);
-            boolean stillLegal = !isInCheck();
-            undoMove(testMove, captured);
+            boolean isPromotionRank = (whiteToMove && toRank == 0) || (!whiteToMove && toRank == 7);
 
-            enPassantSquare = originalEnPassant;
+            if (isPawn && isPromotionRank) {
+                // Vi tilføjer kun én promotion-type (dronning), og lader GUI evt. overskrive
+                Move promotionMove = new Move(move.from, move.to);
 
-            if (stillLegal) {
-                legalMoves.add(move);
+                int originalEnPassant = enPassantSquare;
+                int captured = makeMove(promotionMove);
+
+                // Sæt dronning direkte
+                board[move.to] = (whiteToMove ? MoveGenerator.QUEEN : -MoveGenerator.QUEEN);
+
+                boolean stillLegal = !isInCheck();
+                undoMove(promotionMove, captured);
+                enPassantSquare = originalEnPassant;
+
+                if (stillLegal) {
+                    legalMoves.add(promotionMove);
+                }
+            } else {
+                Move testMove = new Move(move);
+                int originalEnPassant = enPassantSquare;
+
+                int captured = makeMove(testMove);
+                boolean stillLegal = !isInCheck();
+                undoMove(testMove, captured);
+                enPassantSquare = originalEnPassant;
+
+                if (stillLegal) {
+                    legalMoves.add(move);
+                }
             }
-        }
-
-        int kingSquare = whiteToMove ? 4 : 116;
-        if (canCastleKingside(whiteToMove)) {
-            Move m = new Move(kingSquare, whiteToMove ? 6 : 118);
-            m.isCastleKingside = true;
-            legalMoves.add(m);
-        }
-        if (canCastleQueenside(whiteToMove)) {
-            Move m = new Move(kingSquare, whiteToMove ? 2 : 114);
-            m.isCastleQueenside = true;
-            legalMoves.add(m);
         }
 
         return legalMoves;
     }
+
 
     private static boolean canCastleKingside(boolean white) {
         if (isCurrentPlayerInCheck()) {
@@ -120,9 +133,25 @@ public class Game {
     }
 
     public static void reset() {
-        // Standard start-FEN: hvide trækker, alle rokaderettigheder, ingen en passant
+        isWhiteTurn = true;
+        enPassantSquare = -1;
+
+        whiteKingMoved = false;
+        whiteKingsideRookMoved = false;
+        whiteQueensideRookMoved = false;
+
+        blackKingMoved = false;
+        blackKingsideRookMoved = false;
+        blackQueensideRookMoved = false;
+
+        aiPlaysFirst = false;
+
+        Search.reorderMovesBasedOnPreviousSearch(new ArrayList<>(), null);
+
+        // Ryd brættet og indlæs startstilling
         loadFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -");
     }
+
 
     public static void changeTurn() {
         isWhiteTurn = !isWhiteTurn;
@@ -211,6 +240,15 @@ public class Game {
 
         return false;
     }
+
+    public static int findKingSquare(boolean white) {
+        int king = white ? MoveGenerator.KING : -MoveGenerator.KING;
+        for (int i = 0; i < 128; i++) {
+            if ((i & 0x88) == 0 && Game.board[i] == king) return i;
+        }
+        return -1;
+    }
+
 
 
     public static void loadFEN(String fen) {

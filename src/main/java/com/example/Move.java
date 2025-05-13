@@ -21,9 +21,18 @@ public class Move {
     public boolean prevBlackQueensideRookMoved;
     public int prevEnPassantSquare;
 
+    public int promotionPiece = 0;
+
+
     /**
      * Constructs a move from one square to another.
      */
+    public Move(int from, int to, int promotionPiece) {
+        this.from = from;
+        this.to = to;
+        this.promotionPiece = promotionPiece;
+    }
+
     public Move(int from, int to) {
         this.from = from;
         this.to = to;
