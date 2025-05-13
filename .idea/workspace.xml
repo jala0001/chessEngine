@@ -5,20 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="05abe853-bca5-4c1a-b6c5-08cd798a7c55" name="Changes" comment="updated draw by stalemate logic + GUI lir">
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/SlidingHandler.java" afterDir="false" />
-    <list default="true" id="05abe853-bca5-4c1a-b6c5-08cd798a7c55" name="Changes" comment="Iterativ deepening 15 sek">
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/MateDetector.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/example/AI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/AI.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/ChessGUI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/ChessGUI.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/Evaluation.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/Evaluation.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/Game.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/Game.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/Move.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/Move.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/MoveGenerator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/MoveGenerator.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/Search.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/Search.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/Evaluation.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/Evaluation.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/ThreatDetector.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/ThreatDetector.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -81,7 +69,7 @@
     "WebServerToolWindowFactoryState": "false",
     "com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrary": "JUnit5",
     "com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrarySuperClass.JUnit5": "",
-    "git-widget-placeholder": "test",
+    "git-widget-placeholder": "main",
     "kotlin-language-version-configured": "true",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
