@@ -6,6 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="05abe853-bca5-4c1a-b6c5-08cd798a7c55" name="Changes" comment="updated draw by stalemate logic + GUI lir">
       <change afterPath="$PROJECT_DIR$/src/main/java/com/example/SlidingHandler.java" afterDir="false" />
+    <list default="true" id="05abe853-bca5-4c1a-b6c5-08cd798a7c55" name="Changes" comment="Iterativ deepening 15 sek">
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/MateDetector.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/example/AI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/AI.java" afterDir="false" />
@@ -15,6 +17,7 @@
       <change beforePath="$PROJECT_DIR$/src/main/java/com/example/Move.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/Move.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/example/MoveGenerator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/MoveGenerator.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/example/Search.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/Search.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/Evaluation.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/Evaluation.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/example/ThreatDetector.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/ThreatDetector.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -192,7 +195,15 @@
       <option name="project" value="LOCAL" />
       <updated>1745665779371</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="Iterativ deepening 15 sek">
+      <option name="closed" value="true" />
+      <created>1747050955522</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1747050955522</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -205,6 +216,7 @@
     <MESSAGE value="GUI lir" />
     <MESSAGE value="implimented new reversen isincheck method so checkmate now works proper and changed values in evaluation in ai and math in findbestmove so it matches negative logic for black" />
     <MESSAGE value="updated draw by stalemate logic" />
-    <option name="LAST_COMMIT_MESSAGE" value="updated draw by stalemate logic" />
+    <MESSAGE value="Iterativ deepening 15 sek" />
+    <option name="LAST_COMMIT_MESSAGE" value="Iterativ deepening 15 sek" />
   </component>
 </project>

@@ -82,6 +82,23 @@ public class Evaluation {
         int materialScore = 0;
         int positionScore = 0;
         int safetyScore = 0;
+        int mateScore = 0;
+
+        // *** KRITISK: TJEK FOR MAT FØRST ***
+        mateScore = MateDetector.evaluateMateThreats();
+
+        // Hvis der er en mat-trussel, er andre faktorer mindre vigtige
+        if (Math.abs(mateScore) >= 500_000) {
+            if (verbose) {
+                System.out.println("Position Evaluation:");
+                System.out.println(" - Material: " + materialScore);
+                System.out.println(" - Position: " + positionScore);
+                System.out.println(" - Safety: " + safetyScore);
+                System.out.println(" - MATE THREAT: " + mateScore);
+                System.out.println(" = Total: " + mateScore);
+            }
+            return mateScore;
+        }
 
         for (int i = 0; i < 128; i++) {
             if ((i & 0x88) != 0) continue;
@@ -90,11 +107,14 @@ public class Evaluation {
             if (piece == 0) continue;
 
             materialScore += getPieceValue(piece);
-
-            int rank = i >> 4;
-            int file = i & 7;
+          
+            // Positionel bonus via piece-square tables
+            int rank = i >> 4; // Række
+            int file = i & 7;  // Linje
+            // - Hvide brikker bruger PST som "bund" = rank 0 → PST[56..63], dvs. (7-rank)*8+file
+            // - Sorte brikker bruger PST spejlvendt: rank 0 (bund for sort) → PST[0..7], dvs. rank*8+file
             int index = pstIndex(i, piece > 0);
-
+          
             switch (Math.abs(piece)) {
                 case MoveGenerator.PAWN -> positionScore += (piece > 0 ? pawnPST[index] : -pawnPST[index]);
                 case MoveGenerator.KNIGHT -> positionScore += (piece > 0 ? knightPST[index] : -knightPST[index]);
@@ -119,13 +139,14 @@ public class Evaluation {
 
         }
 
-        int totalScore = materialScore + positionScore + safetyScore;
+        int totalScore = materialScore + positionScore + safetyScore + mateScore;
 
         if (verbose) {
             System.out.println("Position Evaluation:");
             System.out.println(" - Material: " + materialScore);
             System.out.println(" - Position: " + positionScore);
             System.out.println(" - Safety: " + safetyScore);
+            System.out.println(" - Mate threats: " + mateScore);
             System.out.println(" = Total: " + totalScore);
         }
 
